@@ -1,0 +1,120 @@
+.wrap {
+  width: 100%;
+  max-width: min(100%, 520px);
+  margin: 0 auto;
+}
+
+.viewport {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 2 / 3;
+  max-height: min(78vh, 720px);
+  margin: 0 auto;
+  border-radius: 4px;
+  border: 1px solid var(--cult-border);
+  background: var(--cult-void);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.55);
+  overflow: hidden;
+}
+
+.slide {
+  position: absolute;
+  inset: 0;
+}
+
+.image {
+  object-fit: contain;
+  object-position: center center;
+}
+
+.dots {
+  position: absolute;
+  top: 0.75rem;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 2;
+  display: flex;
+  gap: 0.5rem;
+  padding: 0.35rem 0.65rem;
+  border-radius: 999px;
+  background: rgba(11, 9, 8, 0.72);
+  border: 1px solid rgba(42, 42, 47, 0.85);
+  backdrop-filter: blur(6px);
+}
+
+.dot {
+  width: 0.45rem;
+  height: 0.45rem;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: var(--cult-border);
+  cursor: pointer;
+  transition: background 0.2s, transform 0.2s;
+}
+
+.dot:hover {
+  background: var(--cult-ash);
+}
+
+.dotActive {
+  background: var(--cult-red-bright);
+  transform: scale(1.15);
+}
+
+.nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 2;
+  width: 2.5rem;
+  height: 2.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(232, 228, 223, 0.2);
+  border-radius: 50%;
+  background: rgba(11, 9, 8, 0.65);
+  color: var(--cult-cream);
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s, color 0.2s;
+}
+
+.nav:hover {
+  background: rgba(196, 30, 30, 0.35);
+  border-color: rgba(224, 32, 32, 0.45);
+}
+
+.nav:focus-visible {
+  outline: 2px solid var(--cult-red-bright);
+  outline-offset: 2px;
+}
+
+.navPrev {
+  left: 0.5rem;
+}
+
+.navNext {
+  right: 0.5rem;
+}
+
+.navIcon {
+  width: 1.1rem;
+  height: 1.1rem;
+  display: block;
+}
+
+@media (max-width: 480px) {
+  .nav {
+    width: 2.15rem;
+    height: 2.15rem;
+  }
+
+  .navPrev {
+    left: 0.35rem;
+  }
+
+  .navNext {
+    right: 0.35rem;
+  }
+}

@@ -1,0 +1,542 @@
+.main {
+  overflow: clip;
+}
+
+/* Hero */
+.hero {
+  position: relative;
+  min-height: 100svh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 5rem 1.5rem 3rem;
+  text-align: center;
+}
+
+.heroGlow {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 80% 50% at 50% 20%, var(--cult-glow) 0%, transparent 55%),
+    radial-gradient(ellipse 60% 40% at 80% 60%, rgba(196, 30, 30, 0.12) 0%, transparent 50%),
+    radial-gradient(ellipse 50% 35% at 15% 80%, rgba(196, 30, 30, 0.08) 0%, transparent 45%);
+  pointer-events: none;
+}
+
+.heroGrid {
+  position: absolute;
+  inset: 0;
+  background-image: linear-gradient(
+      rgba(42, 42, 47, 0.35) 1px,
+      transparent 1px
+    ),
+    linear-gradient(90deg, rgba(42, 42, 47, 0.35) 1px, transparent 1px);
+  background-size: 64px 64px;
+  mask-image: radial-gradient(ellipse 70% 60% at 50% 30%, #000 20%, transparent 70%);
+  pointer-events: none;
+}
+
+.logoWrap {
+  position: relative;
+  z-index: 1;
+  max-width: min(100%, 520px);
+  margin: 0 auto 1.25rem;
+}
+
+.heroEst {
+  position: relative;
+  z-index: 1;
+  margin: 0 0 1rem;
+  font-family: var(--cult-serif);
+  font-size: clamp(0.65rem, 1.8vw, 0.75rem);
+  font-style: italic;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--cult-ash);
+  animation: estBreath 5s ease-in-out infinite;
+}
+
+.heroFilmBar {
+  position: relative;
+  z-index: 1;
+  width: min(320px, 72vw);
+  height: 2px;
+  margin: 0 auto 1.25rem;
+  transform-origin: center;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(196, 30, 30, 0.2) 20%,
+    var(--cult-red-bright) 50%,
+    rgba(196, 30, 30, 0.2) 80%,
+    transparent 100%
+  );
+  box-shadow: 0 0 20px rgba(224, 32, 32, 0.25);
+}
+
+@keyframes estBreath {
+  0%,
+  100% {
+    opacity: 0.72;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .heroEst {
+    animation: none;
+  }
+}
+
+.tagline {
+  position: relative;
+  z-index: 1;
+  font-family: "Bebas Neue", "Impact", sans-serif;
+  font-size: clamp(2.5rem, 6vw, 4.25rem);
+  letter-spacing: 0.08em;
+  line-height: 1.1;
+  margin: 0 0 1.25rem;
+  color: var(--cult-cream);
+  text-transform: uppercase;
+}
+
+.tagline span {
+  color: var(--cult-red-bright);
+}
+
+.heroSub {
+  position: relative;
+  z-index: 1;
+  max-width: 32rem;
+  font-size: 1.05rem;
+  line-height: 1.6;
+  color: var(--cult-ash);
+  margin: 0 0 2rem;
+}
+
+.ctaRow {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  justify-content: center;
+  align-items: center;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.95rem 1.75rem;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  text-decoration: none;
+  border: none;
+  border-radius: 2px;
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.2s, background 0.2s, color 0.2s;
+}
+
+.btn:hover {
+  transform: translateY(-1px);
+}
+
+.btnPrimary {
+  background: var(--cult-red);
+  color: #fff;
+  box-shadow: 0 0 0 1px var(--cult-red-dim), 0 12px 40px rgba(196, 30, 30, 0.35);
+}
+
+.btnPrimary:hover {
+  background: var(--cult-red-bright);
+  box-shadow: 0 0 0 1px var(--cult-red), 0 16px 48px rgba(224, 32, 32, 0.4);
+}
+
+.btnGhost {
+  background: transparent;
+  color: var(--cult-cream);
+  box-shadow: inset 0 0 0 1px var(--cult-border);
+}
+
+.btnGhost:hover {
+  border-color: var(--cult-red);
+  box-shadow: inset 0 0 0 1px var(--cult-red);
+}
+
+.scrollHint {
+  position: absolute;
+  bottom: 1.5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 0.7rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--cult-ash);
+  animation: float 2.5s ease-in-out infinite;
+}
+
+/* Poster slider */
+.posterSection {
+  position: relative;
+  padding: clamp(2rem, 5vw, 3.5rem) 1.5rem clamp(3rem, 8vw, 5rem);
+  border-top: 1px solid var(--cult-border);
+  background: linear-gradient(
+    180deg,
+    var(--cult-void) 0%,
+    var(--cult-black) 45%,
+    var(--cult-void) 100%
+  );
+}
+
+.posterSectionInner {
+  max-width: 1200px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.posterEyebrow {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--cult-red-bright);
+  margin-bottom: 0.5rem;
+}
+
+.posterTitle {
+  font-family: "Bebas Neue", sans-serif;
+  font-size: clamp(1.75rem, 4vw, 2.5rem);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  line-height: 1.1;
+  margin: 0 0 1.5rem;
+  color: var(--cult-cream);
+}
+
+@keyframes float {
+  0%,
+  100% {
+    opacity: 0.4;
+  }
+  50% {
+    opacity: 0.85;
+  }
+}
+
+/* Section */
+.section {
+  position: relative;
+  padding: clamp(4rem, 10vw, 7rem) 1.5rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.sectionHeader {
+  margin-bottom: 2.5rem;
+}
+
+.eyebrow {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--cult-red-bright);
+  margin-bottom: 0.5rem;
+}
+
+.title {
+  font-family: "Bebas Neue", sans-serif;
+  font-size: clamp(2.25rem, 5vw, 3.5rem);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  line-height: 1.05;
+  margin: 0;
+  color: var(--cult-cream);
+}
+
+.lead {
+  max-width: 40rem;
+  font-size: 1.1rem;
+  line-height: 1.7;
+  color: var(--cult-ash);
+  margin: 1rem 0 0;
+}
+
+.brandBlock {
+  max-width: 48rem;
+  margin-top: 0.5rem;
+}
+
+.essenceGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.75rem;
+  margin-top: 1.75rem;
+}
+
+@media (min-width: 520px) {
+  .essenceGrid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.essenceCard {
+  background: var(--cult-surface);
+  border: 1px solid var(--cult-border);
+  padding: 1rem 1.1rem;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: var(--cult-cream);
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.essenceCard:hover {
+  border-color: var(--cult-red-dim);
+  box-shadow: 0 0 24px rgba(196, 30, 30, 0.12);
+}
+
+.quote {
+  margin: 1.5rem 0 0;
+  padding-left: 1rem;
+  border-left: 3px solid var(--cult-red);
+  font-style: italic;
+  color: var(--cult-ash);
+  line-height: 1.6;
+  font-size: 1rem;
+}
+
+/* Identity: copy + compact slider */
+.identityGrid {
+  display: grid;
+  gap: 2.5rem;
+  align-items: start;
+}
+
+.identityCopy {
+  min-width: 0;
+}
+
+.identitySliderCol {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+.identitySliderShell {
+  width: 100%;
+  max-width: min(100%, 300px);
+}
+
+@media (min-width: 960px) {
+  .identityGrid {
+    grid-template-columns: minmax(0, 1fr) minmax(220px, 320px);
+    gap: clamp(2rem, 4vw, 3.5rem);
+    align-items: center;
+  }
+
+  .identitySliderCol {
+    justify-content: flex-end;
+  }
+
+  .identitySliderShell {
+    max-width: 300px;
+  }
+}
+
+/* Notebooks */
+.notebookStrip {
+  background: linear-gradient(180deg, var(--cult-void) 0%, var(--cult-black) 100%);
+  border-top: 1px solid var(--cult-border);
+  border-bottom: 1px solid var(--cult-border);
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.25rem;
+}
+
+@media (min-width: 640px) {
+  .cards {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1000px) {
+  .cards {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.card {
+  position: relative;
+  background: var(--cult-surface);
+  border: 1px solid var(--cult-border);
+  border-radius: 4px;
+  padding: 0;
+  min-height: 280px;
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s;
+  overflow: hidden;
+}
+
+.cardCover {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.cardCoverImg {
+  object-fit: cover;
+  object-position: center;
+  transform: scale(1.02);
+  transition:
+    transform 0.65s cubic-bezier(0.22, 1, 0.36, 1),
+    filter 0.65s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.cardCoverTint {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(
+      165deg,
+      rgba(11, 9, 8, 0.25) 0%,
+      rgba(11, 9, 8, 0.35) 38%,
+      rgba(11, 9, 8, 0.82) 72%,
+      rgba(11, 9, 8, 0.94) 100%
+    ),
+    radial-gradient(
+      ellipse 100% 80% at 100% 0%,
+      rgba(196, 30, 30, 0.28) 0%,
+      transparent 52%
+    );
+}
+
+.cardCoverVignette {
+  position: absolute;
+  inset: 0;
+  box-shadow: inset 0 0 100px rgba(0, 0, 0, 0.55);
+}
+
+.cardCoverGrain {
+  position: absolute;
+  inset: 0;
+  opacity: 0.11;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 256 256'%3E%3Cfilter id='a'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23a)'/%3E%3C/svg%3E");
+}
+
+.card:hover .cardCoverImg {
+  transform: scale(1.08);
+  filter: brightness(1.06) contrast(1.06) saturate(1.05);
+}
+
+.card:hover {
+  transform: translateY(-4px);
+  border-color: rgba(196, 30, 30, 0.4);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.45);
+}
+
+.cardContent {
+  position: relative;
+  z-index: 1;
+  padding: 1.75rem 1.5rem;
+  min-height: 280px;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cardCoverImg {
+    transform: scale(1);
+    transition: none;
+  }
+
+  .card:hover .cardCoverImg {
+    transform: none;
+    filter: none;
+  }
+}
+
+.cardNum {
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  color: var(--cult-red-bright);
+  text-transform: uppercase;
+  margin-bottom: 0.5rem;
+  text-shadow: 0 1px 14px rgba(0, 0, 0, 0.85);
+}
+
+.cardTitle {
+  font-family: "Bebas Neue", sans-serif;
+  font-size: 1.75rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--cult-cream);
+  margin: 0 0 0.75rem;
+  line-height: 1.1;
+  text-shadow: 0 1px 18px rgba(0, 0, 0, 0.75);
+}
+
+.cardDesc {
+  font-size: 0.9rem;
+  line-height: 1.6;
+  color: rgba(232, 228, 223, 0.88);
+  margin: 0;
+  flex: 1;
+  text-shadow: 0 1px 14px rgba(0, 0, 0, 0.65);
+}
+
+.cardTag {
+  margin-top: 1.25rem;
+  font-size: 0.75rem;
+  color: rgba(232, 228, 223, 0.72);
+  letter-spacing: 0.05em;
+  text-shadow: 0 1px 10px rgba(0, 0, 0, 0.6);
+}
+
+/* Footer CTA */
+.footerCta {
+  text-align: center;
+  padding: 4rem 1.5rem 5rem;
+  background: radial-gradient(ellipse 50% 80% at 50% 0%, var(--cult-glow) 0%, transparent 50%);
+}
+
+.footerCta p {
+  max-width: 28rem;
+  margin: 0 auto 1.5rem;
+  color: var(--cult-ash);
+  font-size: 0.95rem;
+  line-height: 1.6;
+}
+
+.footer {
+  border-top: 1px solid var(--cult-border);
+  padding: 2rem 1.5rem;
+  text-align: center;
+  font-size: 0.8rem;
+  color: var(--cult-ash);
+  letter-spacing: 0.04em;
+}
+
+.footer small {
+  display: block;
+  margin-top: 0.5rem;
+  font-size: 0.7rem;
+  opacity: 0.75;
+}
