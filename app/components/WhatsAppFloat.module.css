@@ -1,0 +1,49 @@
+.float {
+  position: fixed;
+  right: max(1.25rem, env(safe-area-inset-right, 0px));
+  bottom: max(1.25rem, env(safe-area-inset-bottom, 0px));
+  z-index: 90;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 3.25rem;
+  height: 3.25rem;
+  border-radius: 50%;
+  color: #fff;
+  background: #25d366;
+  box-shadow:
+    0 4px 14px rgba(0, 0, 0, 0.45),
+    0 0 0 1px rgba(255, 255, 255, 0.08) inset;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease,
+    background 0.2s ease;
+}
+
+.float:hover {
+  background: #20bd5a;
+  transform: scale(1.06);
+  box-shadow:
+    0 6px 20px rgba(37, 211, 102, 0.35),
+    0 0 0 1px rgba(255, 255, 255, 0.12) inset;
+}
+
+.float:focus-visible {
+  outline: 2px solid var(--cult-cream);
+  outline-offset: 3px;
+}
+
+.icon {
+  width: 1.65rem;
+  height: 1.65rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .float {
+    transition: none;
+  }
+
+  .float:hover {
+    transform: none;
+  }
+}

@@ -1,0 +1,54 @@
+@import url("https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=Playfair+Display:ital,wght@0,600;0,700;1,600&display=swap");
+
+:root {
+  /* Slightly warm “aged print” blacks */
+  --cult-black: #0b0908;
+  --cult-void: #12100f;
+  --cult-surface: #181614;
+  --cult-border: #2a2a2f;
+  --cult-red: #c41e1e;
+  --cult-red-bright: #e02020;
+  --cult-red-dim: #8b1515;
+  --cult-ash: #8a8580;
+  --cult-cream: #e8e4df;
+  --cult-glow: rgba(224, 32, 32, 0.35);
+  --cult-serif: "Playfair Display", "Georgia", serif;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: var(--cult-black);
+  color: var(--cult-cream);
+  font-family: "DM Sans", system-ui, sans-serif;
+  font-optical-sizing: auto;
+  -webkit-font-smoothing: antialiased;
+}
+
+::selection {
+  background: var(--cult-red);
+  color: #fff;
+}
+
+/* subtle noise texture overlay */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.028;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  z-index: 9999;
+}
