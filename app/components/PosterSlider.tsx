@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
 import styles from "./PosterSlider.module.css";
 
 export type PosterSliderSlide = {
@@ -23,9 +23,15 @@ const DEFAULT_SLIDES: readonly PosterSliderSlide[] = [
     src: "/page3.png",
     alt: "CultScribe poster — Ozzy Osbourne inspired Prince of Darkness artwork.",
   },
+  {
+    src: "/cult5.jpeg",
+    alt: "CultScribe product showcase — notebook on a black pedestal with Prince of Darkness cover art, additional titles blurred in the background.",
+  },
 ];
 
 const AUTOPLAY_MS = 7000;
+const SLIDE_WIDTH_RATIO = 0.56;
+const SLIDE_GAP_RATIO = 0.04;
 
 function ChevronLeft() {
   return (
@@ -60,20 +66,47 @@ type PosterSliderProps = {
 
 export function PosterSlider({
   ariaLabelledBy,
-  imageSizes = "(max-width: 640px) 100vw, 520px",
+  imageSizes = "(max-width: 640px) 100vw, 960px",
   slides: slidesProp,
 }: PosterSliderProps) {
   const slides = slidesProp ?? DEFAULT_SLIDES;
   const reduceMotion = useReducedMotion();
   const wrapRef = useRef<HTMLDivElement>(null);
+  const viewportRef = useRef<HTMLDivElement>(null);
   const [index, setIndex] = useState(0);
   const [paused, setPaused] = useState(false);
+  const [layout, setLayout] = useState({
+    slideWidth: 0,
+    slideStep: 0,
+    centerOffset: 0,
+    gap: 0,
+  });
 
   const count = slides.length;
+  const activeIndex = count > 0 ? Math.min(index, count - 1) : 0;
 
   useEffect(() => {
-    setIndex((i) => Math.min(i, Math.max(0, count - 1)));
-  }, [count]);
+    const viewport = viewportRef.current;
+    if (!viewport) return;
+
+    const updateLayout = () => {
+      const width = viewport.offsetWidth;
+      const slideWidth = width * SLIDE_WIDTH_RATIO;
+      const gap = Math.min(20, width * SLIDE_GAP_RATIO);
+      setLayout({
+        slideWidth,
+        slideStep: slideWidth + gap,
+        centerOffset: width / 2 - slideWidth / 2,
+        gap,
+      });
+    };
+
+    updateLayout();
+    const observer = new ResizeObserver(updateLayout);
+    observer.observe(viewport);
+    return () => observer.disconnect();
+  }, []);
+
   const goPrev = useCallback(
     () => setIndex((i) => (i - 1 + count) % count),
     [count],
@@ -114,11 +147,13 @@ export function PosterSlider({
 
   const transition = useMemo(
     () => ({
-      duration: reduceMotion ? 0.01 : 0.4,
+      duration: reduceMotion ? 0.01 : 0.45,
       ease: [0.22, 1, 0.36, 1] as const,
     }),
     [reduceMotion],
   );
+
+  const trackX = layout.centerOffset - activeIndex * layout.slideStep;
 
   return (
     <div
@@ -135,6 +170,7 @@ export function PosterSlider({
       }}
     >
       <div
+        ref={viewportRef}
         className={styles.viewport}
         aria-live={reduceMotion ? "off" : "polite"}
       >
@@ -144,9 +180,9 @@ export function PosterSlider({
               key={i}
               type="button"
               role="tab"
-              aria-selected={i === index}
+              aria-selected={i === activeIndex}
               aria-label={`Slide ${i + 1} of ${count}`}
-              className={`${styles.dot} ${i === index ? styles.dotActive : ""}`}
+              className={`${styles.dot} ${i === activeIndex ? styles.dotActive : ""}`}
               onClick={() => setIndex(i)}
             />
           ))}
@@ -169,26 +205,45 @@ export function PosterSlider({
           <ChevronRight />
         </button>
 
-        <AnimatePresence initial={false} mode="wait">
-          <motion.div
-            key={index}
-            className={styles.slide}
-            initial={reduceMotion ? false : { opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={reduceMotion ? undefined : { opacity: 0 }}
-            transition={transition}
-          >
-            <Image
-              src={slides[index].src}
-              alt={slides[index].alt}
-              fill
-              sizes={imageSizes}
-              className={styles.image}
-              priority={index === 0}
-              draggable={false}
-            />
-          </motion.div>
-        </AnimatePresence>
+        <motion.div
+          className={styles.track}
+          style={{ gap: layout.gap ? `${layout.gap}px` : undefined }}
+          animate={{ x: trackX }}
+          transition={transition}
+        >
+          {slides.map((slide, i) => {
+            const isActive = i === activeIndex;
+            return (
+              <motion.button
+                key={slide.src}
+                type="button"
+                className={`${styles.slide} ${isActive ? styles.slideActive : styles.slideSide}`}
+                style={{ width: layout.slideWidth || undefined }}
+                aria-hidden={!isActive}
+                aria-label={isActive ? undefined : `Go to slide ${i + 1}: ${slide.alt}`}
+                tabIndex={isActive ? 0 : -1}
+                onClick={() => {
+                  if (!isActive) setIndex(i);
+                }}
+                animate={{
+                  scale: isActive ? 1 : 0.88,
+                  opacity: isActive ? 1 : 0.55,
+                }}
+                transition={transition}
+              >
+                <Image
+                  src={slide.src}
+                  alt={slide.alt}
+                  fill
+                  sizes={imageSizes}
+                  className={styles.image}
+                  priority={i === 0}
+                  draggable={false}
+                />
+              </motion.button>
+            );
+          })}
+        </motion.div>
       </div>
     </div>
   );
