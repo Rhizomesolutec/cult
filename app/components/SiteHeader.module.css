@@ -33,9 +33,10 @@
   flex-wrap: wrap;
   gap: 0.9rem 1.75rem;
   justify-content: flex-end;
-  font-size: 0.875rem;
+  font-family: var(--cult-sans);
+  font-size: var(--text-nav);
   font-weight: 500;
-  letter-spacing: 0.06em;
+  letter-spacing: var(--tracking-nav);
   text-transform: uppercase;
 }
 
@@ -255,9 +256,10 @@
 .mobileNavLink {
   display: block;
   padding: 1rem 0.75rem;
-  font-size: 0.9375rem;
+  font-family: var(--cult-sans);
+  font-size: var(--text-nav);
   font-weight: 600;
-  letter-spacing: 0.08em;
+  letter-spacing: var(--tracking-wide);
   text-transform: uppercase;
   text-decoration: none;
   color: var(--cult-ash);
