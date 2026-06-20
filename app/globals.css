@@ -1,5 +1,39 @@
 @import url("https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=Playfair+Display:ital,wght@0,600;0,700;1,600&display=swap");
 
+@import "tailwindcss";
+@config "../tailwind.config.ts";
+
+@layer base {
+  :root {
+    --background: 20 14% 4%;
+    --foreground: 40 14% 91%;
+    --card: 24 10% 8%;
+    --card-foreground: 40 14% 91%;
+    --popover: 24 10% 8%;
+    --popover-foreground: 40 14% 91%;
+    --primary: 0 78% 45%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 24 8% 14%;
+    --secondary-foreground: 40 14% 91%;
+    --muted: 24 8% 14%;
+    --muted-foreground: 30 5% 52%;
+    --accent: 24 8% 14%;
+    --accent-foreground: 40 14% 91%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 240 4% 18%;
+    --input: 240 4% 18%;
+    --ring: 0 78% 45%;
+    --radius: 0.5rem;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+}
+
 :root {
   /* Slightly warm “aged print” blacks */
   --cult-black: #0b0908;
@@ -12,8 +46,139 @@
   --cult-ash: #8a8580;
   --cult-cream: #e8e4df;
   --cult-glow: rgba(224, 32, 32, 0.35);
+
+  /* Font families */
+  --cult-sans: "DM Sans", system-ui, sans-serif;
+  --cult-display: "Bebas Neue", "Impact", sans-serif;
   --cult-serif: "Playfair Display", "Georgia", serif;
+
+  /* Type scale */
+  --text-2xs: 0.6875rem;
+  --text-xs: 0.75rem;
+  --text-sm: 0.8125rem;
+  --text-nav: 0.875rem;
+  --text-base: 1rem;
+  --text-lead: 1.0625rem;
+  --text-lg: 1.125rem;
+  --text-xl: 1.25rem;
+  --text-2xl: 1.5rem;
+  --text-card-title: 1.75rem;
+  --text-display-sm: clamp(1.75rem, 4vw, 2.5rem);
+  --text-display-md: clamp(2.25rem, 5vw, 3.5rem);
+  --text-display-lg: clamp(2.5rem, 6vw, 4.25rem);
+
+  /* Letter spacing */
+  --tracking-eyebrow: 0.2em;
+  --tracking-display: 0.06em;
+  --tracking-btn: 0.12em;
+  --tracking-nav: 0.06em;
+  --tracking-label: 0.14em;
+  --tracking-micro: 0.16em;
+  --tracking-wide: 0.08em;
+  --tracking-serif: 0.28em;
+
+  /* Line heights */
+  --leading-tight: 1.1;
+  --leading-snug: 1.05;
+  --leading-normal: 1.6;
+  --leading-relaxed: 1.7;
 }
+
+/* Shared typography roles */
+.cult-eyebrow {
+  font-family: var(--cult-sans);
+  font-size: var(--text-xs);
+  font-weight: 600;
+  letter-spacing: var(--tracking-eyebrow);
+  text-transform: uppercase;
+  color: var(--cult-red-bright);
+}
+
+.cult-display-lg {
+  font-family: var(--cult-display);
+  font-size: var(--text-display-lg);
+  font-weight: 400;
+  letter-spacing: var(--tracking-display);
+  line-height: var(--leading-tight);
+  text-transform: uppercase;
+  color: var(--cult-cream);
+}
+
+.cult-display-md {
+  font-family: var(--cult-display);
+  font-size: var(--text-display-md);
+  font-weight: 400;
+  letter-spacing: var(--tracking-display);
+  line-height: var(--leading-snug);
+  text-transform: uppercase;
+  color: var(--cult-cream);
+}
+
+.cult-display-sm {
+  font-family: var(--cult-display);
+  font-size: var(--text-display-sm);
+  font-weight: 400;
+  letter-spacing: var(--tracking-display);
+  line-height: var(--leading-tight);
+  text-transform: uppercase;
+  color: var(--cult-cream);
+}
+
+.cult-lead {
+  font-family: var(--cult-sans);
+  font-size: var(--text-lead);
+  line-height: var(--leading-relaxed);
+  color: var(--cult-ash);
+}
+
+.cult-body {
+  font-family: var(--cult-sans);
+  font-size: var(--text-base);
+  line-height: var(--leading-normal);
+  color: var(--cult-cream);
+}
+
+.cult-caption {
+  font-family: var(--cult-sans);
+  font-size: var(--text-sm);
+  line-height: var(--leading-normal);
+  color: var(--cult-ash);
+}
+
+.cult-micro {
+  font-family: var(--cult-sans);
+  font-size: var(--text-2xs);
+  font-weight: 600;
+  letter-spacing: var(--tracking-micro);
+  text-transform: uppercase;
+  color: var(--cult-ash);
+}
+
+.cult-label {
+  font-family: var(--cult-sans);
+  font-size: var(--text-2xs);
+  font-weight: 600;
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+  color: var(--cult-ash);
+}
+
+.cult-btn-text {
+  font-family: var(--cult-sans);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  letter-spacing: var(--tracking-btn);
+  text-transform: uppercase;
+}
+
+.cult-serif-accent {
+  font-family: var(--cult-serif);
+  font-style: italic;
+  letter-spacing: var(--tracking-serif);
+  text-transform: uppercase;
+  color: var(--cult-ash);
+}
+
 
 *,
 *::before,
@@ -25,14 +190,18 @@ html {
   scroll-behavior: smooth;
   -webkit-text-size-adjust: 100%;
   text-size-adjust: 100%;
+  overflow-x: clip;
 }
 
 body {
   margin: 0;
   min-height: 100vh;
+  overflow-x: clip;
   background: var(--cult-black);
   color: var(--cult-cream);
-  font-family: "DM Sans", system-ui, sans-serif;
+  font-family: var(--cult-sans);
+  font-size: var(--text-base);
+  line-height: var(--leading-normal);
   font-optical-sizing: auto;
   -webkit-font-smoothing: antialiased;
 }

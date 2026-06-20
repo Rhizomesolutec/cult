@@ -10,6 +10,8 @@ import {
   type PosterSliderSlide,
 } from "./components/PosterSlider";
 import { SiteHeader } from "./components/SiteHeader";
+import { HeroSection } from "@/components/ui/feature-carousel";
+import { SHOWCASE_GALLERY_ITEMS } from "./config/showcase-images";
 import styles from "./page.module.css";
 
 const ESSENCE = [
@@ -167,7 +169,7 @@ export default function Home() {
     <>
       <SiteHeader />
 
-      <main className={styles.main} id="top">
+      <main id="top">
         <motion.section
           className={styles.hero}
           aria-label="Intro"
@@ -231,21 +233,14 @@ export default function Home() {
             whileInView="show"
             viewport={inViewViewport}
           >
-            <motion.span
-              className={styles.posterEyebrow}
-              variants={inViewChild}
-            >
-              The art
-            </motion.span>
-            <motion.h2
-              id="poster-showcase-title"
-              className={styles.posterTitle}
-              variants={inViewChild}
-            >
-              Covers that hit like classic posters
-            </motion.h2>
-            <motion.div variants={inViewChild}>
-              <PosterSlider ariaLabelledBy="poster-showcase-title" />
+            <motion.div variants={inViewChild} className="w-full">
+              <HeroSection
+                titleId="poster-showcase-title"
+                eyebrow="The art"
+                title="Covers that hit like classic posters"
+                subtitle="Stationery inspired by rock and metal — raw, real, and written to last. Scroll the page to spin the gallery."
+                items={[...SHOWCASE_GALLERY_ITEMS]}
+              />
             </motion.div>
           </motion.div>
         </section>
@@ -419,8 +414,7 @@ export default function Home() {
           viewport={inViewViewport}
         >
           <motion.h2
-            className={styles.title}
-            style={{ fontSize: "2rem" }}
+            className={`${styles.title} ${styles.footerTitle}`}
             variants={inViewChild}
           >
             Your story. Your pages.
