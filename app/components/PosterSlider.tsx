@@ -62,9 +62,7 @@ const DEFAULT_SLIDES: readonly PosterSliderSlide[] = [
   ),
 ];
 
-const AUTOPLAY_MS = 7000;
-const SLIDE_WIDTH_RATIO = 0.56;
-const SLIDE_GAP_RATIO = 0.04;
+const AUTOPLAY_MS = 5000;
 
 function ChevronLeft() {
   return (
@@ -124,13 +122,11 @@ export function PosterSlider({
 
     const updateLayout = () => {
       const width = viewport.offsetWidth;
-      const slideWidth = width * SLIDE_WIDTH_RATIO;
-      const gap = Math.min(20, width * SLIDE_GAP_RATIO);
       setLayout({
-        slideWidth,
-        slideStep: slideWidth + gap,
-        centerOffset: width / 2 - slideWidth / 2,
-        gap,
+        slideWidth: width,
+        slideStep: width,
+        centerOffset: 0,
+        gap: 0,
       });
     };
 
@@ -180,7 +176,7 @@ export function PosterSlider({
 
   const transition = useMemo(
     () => ({
-      duration: reduceMotion ? 0.01 : 0.45,
+      duration: reduceMotion ? 0.01 : 0.7,
       ease: [0.22, 1, 0.36, 1] as const,
     }),
     [reduceMotion],
@@ -207,20 +203,6 @@ export function PosterSlider({
         className={styles.viewport}
         aria-live={reduceMotion ? "off" : "polite"}
       >
-        <div className={styles.dots} role="tablist" aria-label="Choose slide">
-          {slides.map((_, i) => (
-            <button
-              key={i}
-              type="button"
-              role="tab"
-              aria-selected={i === activeIndex}
-              aria-label={`Slide ${i + 1} of ${count}`}
-              className={`${styles.dot} ${i === activeIndex ? styles.dotActive : ""}`}
-              onClick={() => setIndex(i)}
-            />
-          ))}
-        </div>
-
         <button
           type="button"
           className={`${styles.nav} ${styles.navPrev}`}
@@ -250,7 +232,7 @@ export function PosterSlider({
               <motion.button
                 key={slide.src}
                 type="button"
-                className={`${styles.slide} ${isActive ? styles.slideActive : styles.slideSide}`}
+                className={styles.slide}
                 style={{ width: layout.slideWidth || undefined }}
                 aria-hidden={!isActive}
                 aria-label={isActive ? undefined : `Go to slide ${i + 1}: ${slide.alt}`}
@@ -258,11 +240,6 @@ export function PosterSlider({
                 onClick={() => {
                   if (!isActive) setIndex(i);
                 }}
-                animate={{
-                  scale: isActive ? 1 : 0.88,
-                  opacity: isActive ? 1 : 0.55,
-                }}
-                transition={transition}
               >
                 <Image
                   src={slide.src}
