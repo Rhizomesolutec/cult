@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState, type CSSProperties } from "react";
 import styles from "./LedgerSection.module.css";
 
 export type LedgerMode = "problem" | "solution";
@@ -19,6 +19,7 @@ export function LedgerScrub({ value, onChange }: LedgerScrubProps) {
   const dragging = useRef(false);
   const liveRatio = useRef(modeToRatio(value));
   const [ratio, setRatio] = useState(() => modeToRatio(value));
+  const [isDragging, setIsDragging] = useState(false);
 
   useEffect(() => {
     if (!dragging.current) {
@@ -28,13 +29,28 @@ export function LedgerScrub({ value, onChange }: LedgerScrubProps) {
     }
   }, [value]);
 
+  useEffect(() => {
+    const el = trackRef.current;
+    if (!el) return;
+
+    const updateTravel = () => {
+      const inner = Math.max(el.offsetWidth - 52, 1);
+      el.style.setProperty("--scrub-travel", `${inner}px`);
+    };
+
+    updateTravel();
+    const observer = new ResizeObserver(updateTravel);
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
   const commitRatio = useCallback(
     (r: number) => {
       const next: LedgerMode = r >= 0.5 ? "solution" : "problem";
       setRatio(modeToRatio(next));
       onChange(next);
     },
-    [onChange]
+    [onChange],
   );
 
   const setFromClientX = useCallback((clientX: number) => {
@@ -53,6 +69,7 @@ export function LedgerScrub({ value, onChange }: LedgerScrubProps) {
     if ((e.target as HTMLElement).closest("button")) return;
     (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
     dragging.current = true;
+    setIsDragging(true);
     setFromClientX(e.clientX);
   };
 
@@ -64,6 +81,7 @@ export function LedgerScrub({ value, onChange }: LedgerScrubProps) {
   const onPointerUp = (e: React.PointerEvent) => {
     if (!dragging.current) return;
     dragging.current = false;
+    setIsDragging(false);
     try {
       (e.currentTarget as HTMLElement).releasePointerCapture(e.pointerId);
     } catch {
@@ -76,16 +94,20 @@ export function LedgerScrub({ value, onChange }: LedgerScrubProps) {
     e.stopPropagation();
     (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
     dragging.current = true;
+    setIsDragging(true);
     setFromClientX(e.clientX);
   };
 
-  const thumbLeftPercent = ratio * 100;
+  const trackStyle = {
+    "--scrub-ratio": ratio,
+  } as CSSProperties;
 
   return (
     <div className={styles.scrub}>
       <div
         ref={trackRef}
-        className={styles.scrubTrack}
+        className={`${styles.scrubTrack} ${isDragging ? styles.scrubDragging : ""}`}
+        style={trackStyle}
         role="slider"
         aria-valuemin={0}
         aria-valuemax={1}
@@ -101,20 +123,10 @@ export function LedgerScrub({ value, onChange }: LedgerScrubProps) {
           <span>Problem</span>
           <span>Solution</span>
         </span>
-        <span
-          className={styles.scrubFill}
-          style={{
-            left: 26,
-            width: `calc((100% - 52px) * ${ratio})`,
-            maxWidth: "calc(100% - 52px)",
-          }}
-        />
+        <span className={styles.scrubFill} aria-hidden />
         <button
           type="button"
           className={styles.scrubThumb}
-          style={{
-            left: `calc(26px + (100% - 52px) * ${ratio})`,
-          }}
           aria-label="Drag seal between problem and solution"
           onPointerDown={onThumbPointerDown}
           onPointerMove={onPointerMove}

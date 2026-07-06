@@ -2,6 +2,8 @@
   position: relative;
   scroll-margin-top: 6rem;
   padding: 6rem 1.25rem;
+  content-visibility: auto;
+  contain-intrinsic-size: auto none auto 900px;
 }
 
 @media (min-width: 768px) {
@@ -139,6 +141,8 @@
 }
 
 .scrubTrack {
+  --scrub-ratio: 0;
+  --scrub-travel: 0px;
   position: relative;
   height: 52px;
   border-radius: 9999px;
@@ -168,18 +172,23 @@
 
 .scrubFill {
   position: absolute;
-  left: 0;
+  left: 26px;
   top: 50%;
+  width: calc(100% - 52px);
   height: 2px;
   margin-top: -1px;
   border-radius: 1px;
   background: linear-gradient(90deg, var(--cult-red-bright), rgba(224, 32, 32, 0.4));
+  transform: scaleX(var(--scrub-ratio));
   transform-origin: left center;
   pointer-events: none;
+  will-change: transform;
+  transition: transform 0.28s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .scrubThumb {
   position: absolute;
+  left: 26px;
   top: 50%;
   width: 44px;
   height: 44px;
@@ -194,8 +203,18 @@
     0 0 0 3px rgba(224, 32, 32, 0.55),
     0 0 24px rgba(224, 32, 32, 0.45),
     0 4px 12px rgba(0, 0, 0, 0.5);
-  transition: box-shadow 0.2s;
+  transition:
+    translate 0.28s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.2s;
+  translate: calc(var(--scrub-travel) * var(--scrub-ratio)) 0;
+  will-change: translate;
   animation: sealPulse 2.4s ease-in-out infinite;
+}
+
+.scrubDragging .scrubThumb,
+.scrubDragging .scrubFill {
+  transition: none;
+  animation: none;
 }
 
 .scrubThumb:active {

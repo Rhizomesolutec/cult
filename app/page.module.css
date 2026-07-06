@@ -190,6 +190,8 @@
     var(--cult-black) 45%,
     var(--cult-void) 100%
   );
+  content-visibility: auto;
+  contain-intrinsic-size: auto none auto 720px;
 }
 
 .posterSectionInner {
@@ -236,6 +238,11 @@
   padding: clamp(4rem, 10vw, 7rem) 1.5rem;
   max-width: 1200px;
   margin: 0 auto;
+}
+
+#identity {
+  content-visibility: auto;
+  contain-intrinsic-size: auto none auto 900px;
 }
 
 .sectionHeader {
@@ -361,6 +368,8 @@
   background: linear-gradient(180deg, var(--cult-void) 0%, var(--cult-black) 100%);
   border-top: 1px solid var(--cult-border);
   border-bottom: 1px solid var(--cult-border);
+  content-visibility: auto;
+  contain-intrinsic-size: auto none auto 1100px;
 }
 
 .cards {
@@ -521,6 +530,8 @@
   text-align: center;
   padding: 4rem 1.5rem 5rem;
   background: radial-gradient(ellipse 50% 80% at 50% 0%, var(--cult-glow) 0%, transparent 50%);
+  content-visibility: auto;
+  contain-intrinsic-size: auto none auto 420px;
 }
 
 .footerCta p {

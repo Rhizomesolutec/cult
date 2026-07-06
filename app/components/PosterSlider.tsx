@@ -1,8 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { motion, useReducedMotion } from "framer-motion";
+import { useCallback, useEffect, useRef, useState } from "react";
 import styles from "./PosterSlider.module.css";
 
 export type PosterSliderSlide = {
@@ -95,46 +94,55 @@ type PosterSliderProps = {
   slides?: readonly PosterSliderSlide[];
 };
 
+function isAdjacentSlide(index: number, activeIndex: number, count: number): boolean {
+  if (count <= 1) return true;
+  const diff = Math.abs(index - activeIndex);
+  return diff <= 1 || diff === count - 1;
+}
+
 export function PosterSlider({
   ariaLabelledBy,
   imageSizes = "(max-width: 640px) 100vw, 960px",
   slides: slidesProp,
 }: PosterSliderProps) {
   const slides = slidesProp ?? DEFAULT_SLIDES;
-  const reduceMotion = useReducedMotion();
   const wrapRef = useRef<HTMLDivElement>(null);
   const viewportRef = useRef<HTMLDivElement>(null);
+  const trackRef = useRef<HTMLDivElement>(null);
   const [index, setIndex] = useState(0);
   const [paused, setPaused] = useState(false);
-  const [layout, setLayout] = useState({
-    slideWidth: 0,
-    slideStep: 0,
-    centerOffset: 0,
-    gap: 0,
-  });
+  const [reduceMotion, setReduceMotion] = useState(false);
 
   const count = slides.length;
   const activeIndex = count > 0 ? Math.min(index, count - 1) : 0;
 
   useEffect(() => {
+    const media = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const update = () => setReduceMotion(media.matches);
+    update();
+    media.addEventListener("change", update);
+    return () => media.removeEventListener("change", update);
+  }, []);
+
+  const updateTrackOffset = useCallback(() => {
+    const viewport = viewportRef.current;
+    const track = trackRef.current;
+    if (!viewport || !track) return;
+
+    const width = viewport.offsetWidth;
+    viewport.style.setProperty("--slide-width", `${width}px`);
+    track.style.setProperty("--slide-offset", `${-activeIndex * width}px`);
+  }, [activeIndex]);
+
+  useEffect(() => {
     const viewport = viewportRef.current;
     if (!viewport) return;
 
-    const updateLayout = () => {
-      const width = viewport.offsetWidth;
-      setLayout({
-        slideWidth: width,
-        slideStep: width,
-        centerOffset: 0,
-        gap: 0,
-      });
-    };
-
-    updateLayout();
-    const observer = new ResizeObserver(updateLayout);
+    updateTrackOffset();
+    const observer = new ResizeObserver(updateTrackOffset);
     observer.observe(viewport);
     return () => observer.disconnect();
-  }, []);
+  }, [updateTrackOffset]);
 
   const goPrev = useCallback(
     () => setIndex((i) => (i - 1 + count) % count),
@@ -174,16 +182,6 @@ export function PosterSlider({
     return () => document.removeEventListener("keydown", onKey);
   }, [goPrev, goNext]);
 
-  const transition = useMemo(
-    () => ({
-      duration: reduceMotion ? 0.01 : 0.7,
-      ease: [0.22, 1, 0.36, 1] as const,
-    }),
-    [reduceMotion],
-  );
-
-  const trackX = layout.centerOffset - activeIndex * layout.slideStep;
-
   return (
     <div
       ref={wrapRef}
@@ -220,40 +218,43 @@ export function PosterSlider({
           <ChevronRight />
         </button>
 
-        <motion.div
-          className={styles.track}
-          style={{ gap: layout.gap ? `${layout.gap}px` : undefined }}
-          animate={{ x: trackX }}
-          transition={transition}
+        <div
+          ref={trackRef}
+          className={`${styles.track} ${reduceMotion ? styles.trackReduced : ""}`}
         >
-          {slides.map((slide, i) => {
+          {slides.map((slideItem, i) => {
             const isActive = i === activeIndex;
+            const isNear = isAdjacentSlide(i, activeIndex, count);
+            const isPriority = i === 0;
             return (
-              <motion.button
-                key={slide.src}
+              <button
+                key={slideItem.src}
                 type="button"
-                className={styles.slide}
-                style={{ width: layout.slideWidth || undefined }}
+                className={`${styles.slide} ${isActive ? styles.slideActive : ""}`}
                 aria-hidden={!isActive}
-                aria-label={isActive ? undefined : `Go to slide ${i + 1}: ${slide.alt}`}
+                aria-label={
+                  isActive ? undefined : `Go to slide ${i + 1}: ${slideItem.alt}`
+                }
                 tabIndex={isActive ? 0 : -1}
                 onClick={() => {
                   if (!isActive) setIndex(i);
                 }}
               >
                 <Image
-                  src={slide.src}
-                  alt={slide.alt}
+                  src={slideItem.src}
+                  alt={slideItem.alt}
                   fill
                   sizes={imageSizes}
                   className={styles.image}
-                  priority={i === 0}
+                  priority={isPriority}
+                  {...(!isPriority && { loading: isNear ? "eager" : "lazy" })}
+                  fetchPriority={isActive || isPriority ? "high" : isNear ? "auto" : "low"}
                   draggable={false}
                 />
-              </motion.button>
+              </button>
             );
           })}
-        </motion.div>
+        </div>
       </div>
     </div>
   );
