@@ -8,7 +8,17 @@
 /out/
 
 # env
+<<<<<<< HEAD
 .env*.local
+=======
+.env
+.env*.local
+.env.local
+
+# uploaded product images
+/public/uploads/products/*
+!/public/uploads/products/.gitkeep
+>>>>>>> a23029f (Add CultScribe e-commerce, admin panel, and SMTP email structure)
 
 # debug
 npm-debug.log*
