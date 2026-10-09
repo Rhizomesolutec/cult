@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { SiteHeader } from "@/app/components/SiteHeader";
 import { useCart } from "@/components/CartProvider";
@@ -9,6 +10,7 @@ import type { ProductDTO } from "@/lib/types/commerce";
 import styles from "./page.module.css";
 
 export default function ShopPage() {
+  const router = useRouter();
   const { addItem } = useCart();
   const [products, setProducts] = useState<ProductDTO[]>([]);
   const [loading, setLoading] = useState(true);
@@ -42,10 +44,9 @@ export default function ShopPage() {
     setMessage("");
     try {
       await addItem(productId, 1);
-      setMessage("Added to cart");
+      router.push("/cart");
     } catch (e) {
       setMessage(e instanceof Error ? e.message : "Could not add to cart");
-    } finally {
       setBusyId(null);
     }
   };
@@ -57,8 +58,7 @@ export default function ShopPage() {
         <span className={styles.eyebrow}>Shop</span>
         <h1 className={styles.title}>Notebooks like album art</h1>
         <p className={styles.lead}>
-          Browse the CultScribe collection. Add to cart and checkout with the demo
-          payment gateway — no real charges.
+          Browse the CultScribe collection. Add to cart and checkout via WhatsApp.
         </p>
 
         {loading ? <p className={styles.status}>Loading products…</p> : null}

@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import type { Variants } from "framer-motion";
 import { motion, useReducedMotion } from "framer-motion";
 import { useEffect, useMemo, useState } from "react";
@@ -54,6 +55,7 @@ export function HomeProductsSection({
   inViewChild,
   inViewViewport,
 }: HomeProductsSectionProps) {
+  const router = useRouter();
   const { addItem } = useCart();
   const reduceMotion = useReducedMotion();
   const [bySlug, setBySlug] = useState<Record<string, ProductDTO>>({});
@@ -90,10 +92,9 @@ export function HomeProductsSection({
     setMessage("");
     try {
       await addItem(product.id, 1);
-      setMessage(`${product.name} added to cart`);
+      router.push("/cart");
     } catch (e) {
       setMessage(e instanceof Error ? e.message : "Could not add to cart");
-    } finally {
       setBusySlug(null);
     }
   };
@@ -168,13 +169,12 @@ export function HomeProductsSection({
                   src={item.image}
                   alt=""
                   fill
-                  sizes="(max-width: 719px) 100vw, (max-width: 1099px) 50vw, 420px"
+                  sizes="(max-width: 719px) 50vw, (max-width: 1099px) 50vw, 420px"
                   className={styles.cardCoverImg}
                   draggable={false}
                 />
                 <div className={styles.cardCoverTint} />
                 <div className={styles.cardCoverVignette} />
-                <div className={styles.cardCoverGrain} />
               </div>
               <div className={styles.cardContent}>
                 <span className={styles.cardNum}>Series {item.id}</span>
@@ -185,20 +185,30 @@ export function HomeProductsSection({
                   <button
                     type="button"
                     className={styles.productAddBtn}
+                    aria-label={`Add ${item.title} to cart`}
                     disabled={
                       Boolean(busySlug) ||
                       (Boolean(bySlug[item.slug]) && !item.inStock)
                     }
                     onClick={() => void onAdd(item.slug)}
                   >
-                    {busySlug === item.slug
-                      ? "Adding…"
-                      : bySlug[item.slug] && !item.inStock
-                        ? "Sold out"
-                        : "Add to cart"}
+                    {busySlug === item.slug ? (
+                      "…"
+                    ) : bySlug[item.slug] && !item.inStock ? (
+                      <>
+                        <span className={styles.btnLabelFull}>Sold out</span>
+                        <span className={styles.btnLabelShort}>Out</span>
+                      </>
+                    ) : (
+                      <>
+                        <span className={styles.btnLabelFull}>Add to cart</span>
+                        <span className={styles.btnLabelShort}>Add</span>
+                      </>
+                    )}
                   </button>
-                  <Link className={styles.productShopLink} href="/shop">
-                    View shop
+                  <Link className={styles.productShopLink} href="/shop" aria-label="View shop">
+                    <span className={styles.btnLabelFull}>View shop</span>
+                    <span className={styles.btnLabelShort}>Shop</span>
                   </Link>
                 </div>
               </div>

@@ -1,5 +1,7 @@
 import type { Types } from "mongoose";
 
+export type ProductSize = "normal" | "a4";
+
 export type ProductDTO = {
   id: string;
   slug: string;
@@ -11,6 +13,8 @@ export type ProductDTO = {
   image: string;
   stock: number;
   featured: boolean;
+  designSlug?: string;
+  size?: ProductSize;
 };
 
 export type CartItemDTO = {
@@ -43,6 +47,8 @@ export function toProductDTO(p: {
   image: string;
   stock: number;
   featured?: boolean;
+  designSlug?: string;
+  size?: ProductSize;
 }): ProductDTO {
   return {
     id: String(p._id),
@@ -55,5 +61,7 @@ export function toProductDTO(p: {
     image: p.image,
     stock: p.stock,
     featured: Boolean(p.featured),
+    designSlug: p.designSlug,
+    size: p.size,
   };
 }

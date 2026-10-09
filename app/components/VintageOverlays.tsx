@@ -3,16 +3,13 @@
 import styles from "./VintageOverlays.module.css";
 
 /**
- * Fixed “old film / analog booth” layers: vignette, warm wash, grain, scanlines,
- * sprocket hints, corner brackets. Sits below the header (z-index) and does not
- * intercept clicks.
+ * Fixed overlay layers: vignette, warm wash, scanlines, sprocket hints, corners.
  */
 export function VintageOverlays() {
   return (
     <div className={styles.root} aria-hidden>
       <div className={styles.vignette} />
       <div className={styles.wash} />
-      <div className={styles.grain} />
       <div className={styles.scanlines} />
       <div className={styles.sprocketLeft} />
       <div className={styles.sprocketRight} />

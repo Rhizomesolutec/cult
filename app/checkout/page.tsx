@@ -2,14 +2,17 @@
 
 import Link from "next/link";
 import { FormEvent, useState } from "react";
-import { useRouter } from "next/navigation";
 import { SiteHeader } from "@/app/components/SiteHeader";
+import {
+  WHATSAPP_DISPLAY,
+  buildCheckoutWhatsAppMessage,
+  whatsAppUrl,
+} from "@/app/config/whatsapp";
 import { useCart } from "@/components/CartProvider";
 import { formatINR } from "@/lib/commerce-client";
 import styles from "./page.module.css";
 
 export default function CheckoutPage() {
-  const router = useRouter();
   const { cart, loading, refresh } = useCart();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -42,24 +45,33 @@ export default function CheckoutPage() {
         throw new Error(checkoutData.error || "Checkout failed");
       }
 
-      const payRes = await fetch("/api/payments/demo", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          orderId: checkoutData.order.id,
-          outcome: "success",
-        }),
-      });
-      const payData = await payRes.json();
-      if (!payRes.ok) {
-        throw new Error(payData.error || "Demo payment failed");
-      }
+      const order = checkoutData.order as {
+        orderNumber: string;
+        subtotal: number;
+      };
 
+      const message = buildCheckoutWhatsAppMessage({
+        orderNumber: order.orderNumber,
+        name: name.trim(),
+        email: email.trim(),
+        phone: phone.trim(),
+        address: address.trim(),
+        city: city.trim(),
+        pincode: pincode.trim(),
+        items: cart.items.map((item) => ({
+          name: item.name,
+          quantity: item.quantity,
+          lineTotal: item.lineTotal,
+        })),
+        subtotal: order.subtotal,
+      });
+
+      await fetch("/api/cart", { method: "DELETE" });
       await refresh();
-      router.push(`/order/${checkoutData.order.id}`);
+
+      window.location.href = whatsAppUrl(message);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Checkout failed");
-    } finally {
       setBusy(false);
     }
   };
@@ -71,8 +83,9 @@ export default function CheckoutPage() {
         <span className={styles.eyebrow}>Checkout</span>
         <h1 className={styles.title}>Payment details</h1>
         <p className={styles.lead}>
-          Enter delivery details and complete payment. Demo gateway for now —
-          SMTP confirmation emails run when configured.
+          Enter your delivery details, then pay via WhatsApp. You&apos;ll be
+          redirected to chat with us at {WHATSAPP_DISPLAY} to confirm payment
+          and delivery.
         </p>
 
         {loading ? <p className={styles.lead}>Loading…</p> : null}
@@ -132,7 +145,7 @@ export default function CheckoutPage() {
               />
 
               <label className={styles.label} htmlFor="phone">
-                Phone
+                Phone (WhatsApp)
               </label>
               <input
                 id="phone"
@@ -140,6 +153,8 @@ export default function CheckoutPage() {
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
                 autoComplete="tel"
+                required
+                inputMode="tel"
               />
 
               <label className={styles.label} htmlFor="address">
@@ -179,17 +194,16 @@ export default function CheckoutPage() {
               />
 
               <div className={styles.actions}>
-                <button className={styles.btn} type="submit" disabled={busy}>
-                  {busy ? "Processing…" : "Pay with demo gateway"}
+                <button className={`${styles.btn} ${styles.btnPay}`} type="submit" disabled={busy}>
+                  {busy ? "Opening WhatsApp…" : "Pay now"}
                 </button>
                 <Link className={`${styles.btn} ${styles.btnGhost}`} href="/cart">
                   Back to cart
                 </Link>
               </div>
               <p className={styles.note}>
-                After payment we store the order in MongoDB and queue customer +
-                delivery-agency emails (see{" "}
-                <code>docs/EMAIL_SETUP.md</code>).
+                Tap Pay now to send your order to WhatsApp. We&apos;ll confirm
+                payment and delivery details with you there.
               </p>
             </form>
           </div>

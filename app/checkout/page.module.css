@@ -143,6 +143,20 @@
   color: #1a1714;
 }
 
+.btnPay {
+  background: #25d366;
+  color: #fff;
+}
+
+.btnPay:hover:not(:disabled) {
+  background: #1ebe57;
+}
+
+.btnPay:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
 .error {
   color: #b42318;
   margin: 0 0 1rem;

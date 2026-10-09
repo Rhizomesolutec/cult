@@ -1,9 +1,11 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import { motion, useReducedMotion } from "framer-motion";
 import { useMemo } from "react";
+import { CollectionStats } from "./components/CollectionStats";
+import { ExploreCollection } from "./components/ExploreCollection";
+import { HeroNotebook } from "./components/HeroNotebook";
 import { HomeProductsSection } from "./components/HomeProductsSection";
 import { LedgerSection } from "./components/LedgerSection";
 import {
@@ -11,8 +13,8 @@ import {
   type PosterSliderSlide,
 } from "./components/PosterSlider";
 import { SiteHeader } from "./components/SiteHeader";
-import { HeroSection } from "@/components/ui/feature-carousel";
-import { SHOWCASE_GALLERY_ITEMS } from "./config/showcase-images";
+import { PosterStack } from "./components/PosterStack";
+import { COLLECTION_GALLERY_ITEMS } from "./config/showcase-images";
 import styles from "./page.module.css";
 
 const ESSENCE = [
@@ -50,56 +52,6 @@ const IDENTITY_SLIDER_SLIDES: readonly PosterSliderSlide[] = [
 
 export default function Home() {
   const reduceMotion = useReducedMotion();
-
-  const heroContainer = useMemo(
-    () => ({
-      hidden: {},
-      show: {
-        transition: {
-          staggerChildren: reduceMotion ? 0 : 0.1,
-          delayChildren: reduceMotion ? 0 : 0.06,
-        },
-      },
-    }),
-    [reduceMotion],
-  );
-
-  /** Hero: blur clears + soft rise */
-  const blurFadeUp = useMemo(
-    () => ({
-      hidden: reduceMotion
-        ? { opacity: 0 }
-        : { opacity: 0, y: 22, filter: "blur(12px)" },
-      show: {
-        opacity: 1,
-        y: 0,
-        filter: "blur(0px)",
-        transition: {
-          duration: reduceMotion ? 0.01 : 0.72,
-          ease: EASE_OUT,
-        },
-      },
-    }),
-    [reduceMotion],
-  );
-
-  const filmBar = useMemo(
-    () => ({
-      hidden: reduceMotion
-        ? { opacity: 0 }
-        : { opacity: 0, scaleX: 0, filter: "blur(6px)" },
-      show: {
-        opacity: 1,
-        scaleX: 1,
-        filter: "blur(0px)",
-        transition: {
-          duration: reduceMotion ? 0.01 : 0.8,
-          ease: EASE_OUT,
-        },
-      },
-    }),
-    [reduceMotion],
-  );
 
   /** Scroll-in sections: staggered blur fade */
   const inViewParent = useMemo(
@@ -144,57 +96,11 @@ export default function Home() {
       <SiteHeader />
 
       <main id="top">
-        <motion.section
-          className={styles.hero}
-          aria-label="Intro"
-          variants={heroContainer}
-          initial="hidden"
-          animate="show"
-        >
-          <div className={styles.heroGlow} aria-hidden />
-          <div className={styles.heroGrid} aria-hidden />
+        <HeroNotebook />
 
-          <motion.div className={styles.logoWrap} variants={blurFadeUp}>
-            <Image
-              src="/logo.png"
-              alt="CultScribe — Raw. Real. Written."
-              width={520}
-              height={200}
-              priority
-              style={{ width: "100%", height: "auto" }}
-            />
-          </motion.div>
+        <ExploreCollection />
 
-          <motion.p className={styles.heroEst} variants={blurFadeUp}>
-            Analog soul · Hand-finished spirit
-          </motion.p>
-
-          <motion.div
-            className={styles.heroFilmBar}
-            variants={filmBar}
-            aria-hidden
-          />
-
-          <motion.h1 className={styles.tagline} variants={blurFadeUp}>
-            Where <span>legends</span> live forever
-          </motion.h1>
-          <motion.p className={styles.heroSub} variants={blurFadeUp}>
-            Notebooks that honor the timeless spirit of rock and metal—born from
-            a love of musical history, built for students and creators who refuse
-            generic stationery.
-          </motion.p>
-          <motion.div className={styles.ctaRow} variants={blurFadeUp}>
-            <Link className={`${styles.btn} ${styles.btnPrimary}`} href="/shop">
-              Shop notebooks
-            </Link>
-            <a className={`${styles.btn} ${styles.btnGhost}`} href="#products">
-              Featured products
-            </a>
-          </motion.div>
-          <motion.p className={styles.scrollHint} variants={blurFadeUp}>
-            Scroll
-          </motion.p>
-        </motion.section>
+        <CollectionStats />
 
         <section
           className={styles.posterSection}
@@ -208,16 +114,24 @@ export default function Home() {
             viewport={inViewViewport}
           >
             <motion.div variants={inViewChild} className="w-full">
-              <HeroSection
+              <PosterStack
                 titleId="poster-showcase-title"
                 eyebrow="The art"
                 title="Covers that hit like classic posters"
-                subtitle="Stationery inspired by rock and metal — raw, real, and written to last. Scroll the page to spin the gallery."
-                items={[...SHOWCASE_GALLERY_ITEMS]}
+                subtitle="The same notebooks from our collection — swipe or tap a cover behind to shuffle the stack."
+                items={COLLECTION_GALLERY_ITEMS}
               />
             </motion.div>
           </motion.div>
         </section>
+
+        <HomeProductsSection
+          inViewParent={inViewParent}
+          inViewChild={inViewChild}
+          inViewViewport={inViewViewport}
+        />
+
+        <LedgerSection />
 
         <section
           className={styles.section}
@@ -309,14 +223,6 @@ export default function Home() {
             </motion.div>
           </div>
         </section>
-
-        <LedgerSection />
-
-        <HomeProductsSection
-          inViewParent={inViewParent}
-          inViewChild={inViewChild}
-          inViewViewport={inViewViewport}
-        />
 
         <motion.section
           className={styles.footerCta}

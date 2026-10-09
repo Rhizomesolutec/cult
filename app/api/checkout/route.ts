@@ -68,7 +68,7 @@ export async function POST(req: Request) {
       currency: cart.currency,
       status: "pending_payment",
       fulfillmentStatus: "awaiting_payment",
-      payment: { provider: "demo", demoRef: "", gatewayPaymentId: "" },
+      payment: { provider: "whatsapp", demoRef: "", gatewayPaymentId: "" },
       delivery: {
         agencyName: process.env.DELIVERY_AGENCY_NAME?.trim() || "",
         agencyEmail: process.env.DELIVERY_AGENCY_EMAIL?.trim() || "",

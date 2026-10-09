@@ -81,6 +81,7 @@ export function SiteHeader() {
       </Link>
 
       <nav className={styles.navLinks} aria-label="Primary">
+        <Link href="/#collection">Collection</Link>
         <Link href="/#identity">Identity</Link>
         <Link href="/#ledger">Ledger</Link>
         <Link href="/shop" className={shopActive ? styles.navLinkActive : ""}>
@@ -151,6 +152,13 @@ export function SiteHeader() {
           </button>
         </div>
         <nav className={styles.mobileNav} aria-label="Primary mobile">
+          <Link
+            href="/#collection"
+            className={linkClass(false)}
+            onClick={closeMenu}
+          >
+            Collection
+          </Link>
           <Link
             href="/#identity"
             className={linkClass(false)}

@@ -1,4 +1,13 @@
-import type { GalleryItem } from "@/components/ui/circular-gallery";
+export type GalleryItem = {
+  common: string;
+  binomial: string;
+  photo: {
+    url: string;
+    text: string;
+    pos?: string;
+    by: string;
+  };
+};
 
 export type ShowcaseImage = {
   src: string;
@@ -74,6 +83,7 @@ const galleryItem = (
   },
 });
 
+/** Lifestyle / product showcase shots (legacy). */
 export const SHOWCASE_GALLERY_ITEMS: readonly GalleryItem[] = [
   galleryItem(
     "cultscribe 3.jpg.jpeg",
@@ -152,4 +162,78 @@ export const SHOWCASE_GALLERY_ITEMS: readonly GalleryItem[] = [
     "CultScribe Minutes to Midnight notebook cover — singer silhouette with horizon line artwork.",
     "50% 30%",
   ),
+];
+
+/**
+ * Collection notebook covers for the home poster stack —
+ * same books shown in Explore Collection.
+ */
+export const COLLECTION_GALLERY_ITEMS: readonly GalleryItem[] = [
+  {
+    common: "The Legends Line",
+    binomial: "Series 01",
+    photo: {
+      url: "/page1.png",
+      text: "CultScribe The Legends Line notebook cover",
+      by: "CultScribe",
+    },
+  },
+  {
+    common: "Studio & Sketch",
+    binomial: "Series 02",
+    photo: {
+      url: "/page2.png",
+      text: "CultScribe Studio & Sketch notebook cover",
+      by: "CultScribe",
+    },
+  },
+  {
+    common: "Tour Edition",
+    binomial: "Series 03",
+    photo: {
+      url: "/page3.png",
+      text: "CultScribe Tour Edition notebook cover",
+      by: "CultScribe",
+    },
+  },
+  {
+    common: "Prince of Darkness",
+    binomial: "The Legends Line",
+    photo: {
+      url: "/cultscribe%205.jpg",
+      text: "CultScribe Prince of Darkness notebook",
+      pos: "50% 35%",
+      by: "CultScribe",
+    },
+  },
+  {
+    common: "GNR Was Here",
+    binomial: "Studio & Sketch",
+    photo: {
+      url: "/cultscribe%208.jpg",
+      text: "CultScribe GNR Was Here notebook",
+      pos: "50% 40%",
+      by: "CultScribe",
+    },
+  },
+  {
+    common: "Minutes to Midnight",
+    binomial: "Tour Edition",
+    photo: {
+      url: "/cultscribe%2022.jpg",
+      text: "CultScribe Minutes to Midnight notebook cover",
+      pos: "50% 30%",
+      by: "CultScribe",
+    },
+  },
+  {
+    common: "Midnight Sessions",
+    binomial: "Series 04",
+    photo: {
+      url: "/cultscribe%2011.jpg",
+      text: "CultScribe Midnight Sessions notebook",
+      pos: "55% 45%",
+      by: "CultScribe",
+    },
+  },
 ];
