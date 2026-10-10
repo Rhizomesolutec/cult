@@ -5,6 +5,10 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { SiteHeader } from "@/app/components/SiteHeader";
 import { useCart } from "@/components/CartProvider";
+import {
+  NOTEBOOK_SPECS,
+  notebookSpecsLine,
+} from "@/lib/config/notebook-designs";
 import { formatINR } from "@/lib/commerce-client";
 import type { ProductDTO } from "@/lib/types/commerce";
 import styles from "./page.module.css";
@@ -58,7 +62,9 @@ export default function ShopPage() {
         <span className={styles.eyebrow}>Shop</span>
         <h1 className={styles.title}>Notebooks like album art</h1>
         <p className={styles.lead}>
-          Browse the CultScribe collection. Add to cart and checkout via WhatsApp.
+          Browse the CultScribe collection — {NOTEBOOK_SPECS.pages} pages,{" "}
+          {NOTEBOOK_SPECS.gsm} GSM, {NOTEBOOK_SPECS.paper} paper. Checkout via
+          WhatsApp.
         </p>
 
         {loading ? <p className={styles.status}>Loading products…</p> : null}
@@ -84,6 +90,7 @@ export default function ShopPage() {
               <div className={styles.body}>
                 <span className={styles.series}>{p.series}</span>
                 <h2 className={styles.name}>{p.name}</h2>
+                <p className={styles.specsMeta}>{notebookSpecsLine(true)}</p>
                 <p className={styles.desc}>{p.description}</p>
                 <div className={styles.row}>
                   <span className={styles.price}>{formatINR(p.price)}</span>

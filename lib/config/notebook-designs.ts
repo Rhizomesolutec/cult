@@ -14,6 +14,31 @@ export type NotebookDesignConfig = {
   featured?: boolean;
 };
 
+/** Shared specs for every CultScribe notebook. */
+export const NOTEBOOK_SPECS = {
+  pages: 160,
+  gsm: 60,
+  paper: "Andhra TruPrint Ultra HB",
+  paperShort: "TruPrint Ultra HB",
+} as const;
+
+export const PAPER_INTRO =
+  "Every CultScribe notebook is filled with Andhra TruPrint Ultra (HB) — premium surface-sized Maplitho paper made for notebooks, journals, textbooks, diaries, and everyday writing.";
+
+export const PAPER_FEATURES = [
+  "Top of the line surface-sized paper with sublime formation, aesthetics and print quality",
+  "93 brightness paper in white shade",
+  "Alkaline sizing for added archival quality that extends the life of the document",
+  "Excellent press runnability",
+  "Recommended for most jobs with heavy ink coverage",
+  "Made with ECF pulp",
+] as const;
+
+export function notebookSpecsLine(compact = false): string {
+  const paper = compact ? NOTEBOOK_SPECS.paperShort : NOTEBOOK_SPECS.paper;
+  return `${NOTEBOOK_SPECS.pages} pages · ${NOTEBOOK_SPECS.gsm} GSM · ${paper}`;
+}
+
 /** Seven unique notebook designs — each maps to two purchasable size variants. */
 export const NOTEBOOK_DESIGNS: readonly NotebookDesignConfig[] = [
   {

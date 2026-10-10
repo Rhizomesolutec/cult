@@ -108,6 +108,15 @@
   line-height: 1.15;
 }
 
+.specsMeta {
+  margin: 0;
+  font-size: 0.5625rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: rgba(232, 225, 215, 0.7);
+  line-height: 1.35;
+}
+
 .desc {
   margin: 0;
   flex: 1;
@@ -198,6 +207,10 @@
 
   .name {
     font-size: var(--text-xl);
+  }
+
+  .specsMeta {
+    font-size: var(--text-2xs);
   }
 
   .desc {

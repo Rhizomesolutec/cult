@@ -1,8 +1,17 @@
 import { connectDB } from "@/lib/db";
-import { NOTEBOOK_DESIGNS } from "@/lib/config/notebook-designs";
+import {
+  NOTEBOOK_DESIGNS,
+  notebookSpecsLine,
+} from "@/lib/config/notebook-designs";
 import { Product } from "@/lib/models/Product";
 
 const BASE_PRICE = 60;
+
+function productDescription(designDescription: string, a4 = false): string {
+  const base = `${designDescription} ${notebookSpecsLine()}.`;
+  if (!a4) return base;
+  return `${base} Available in A4 format for larger spreads and heavier writing sessions.`;
+}
 
 function buildSeedProducts() {
   const products = [];
@@ -12,7 +21,7 @@ function buildSeedProducts() {
       slug: design.normalSlug,
       name: design.name,
       series: design.series,
-      description: design.description,
+      description: productDescription(design.description),
       price: BASE_PRICE,
       currency: "INR",
       image: design.image,
@@ -27,7 +36,7 @@ function buildSeedProducts() {
       slug: design.a4Slug,
       name: `${design.name} — A4`,
       series: design.series,
-      description: `${design.description} Available in A4 format for larger spreads and heavier writing sessions.`,
+      description: productDescription(design.description, true),
       price: BASE_PRICE,
       currency: "INR",
       image: design.image,
@@ -66,7 +75,7 @@ export async function seedProductsIfEmpty() {
           size: "normal",
           name: design.name,
           series: design.series,
-          description: design.description,
+          description: productDescription(design.description),
         },
       },
       { upsert: false },
@@ -82,7 +91,7 @@ export async function seedProductsIfEmpty() {
           size: "a4",
           name: `${design.name} — A4`,
           series: design.series,
-          description: `${design.description} Available in A4 format for larger spreads and heavier writing sessions.`,
+          description: productDescription(design.description, true),
           stock: 40,
           featured: Boolean(design.featured),
           active: true,

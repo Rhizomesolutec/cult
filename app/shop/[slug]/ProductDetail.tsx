@@ -7,6 +7,9 @@ import { useEffect, useState } from "react";
 import { SiteHeader } from "@/app/components/SiteHeader";
 import { useCart } from "@/components/CartProvider";
 import {
+  NOTEBOOK_SPECS,
+  PAPER_FEATURES,
+  PAPER_INTRO,
   sizeLabel,
   type NotebookDesignConfig,
   type NotebookSize,
@@ -27,6 +30,7 @@ export function ProductDetail({ design, initialSize }: ProductDetailProps) {
   const [size, setSize] = useState<NotebookSize>(initialSize);
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState("");
+  const [featuresOpen, setFeaturesOpen] = useState(true);
 
   useEffect(() => {
     let cancelled = false;
@@ -94,7 +98,51 @@ export function ProductDetail({ design, initialSize }: ProductDetailProps) {
             <span className={styles.series}>{design.series}</span>
             <h1 className={styles.title}>{design.name}</h1>
             <p className={styles.subtitle}>{design.subtitle}</p>
+
+            <dl className={styles.specs}>
+              <div className={styles.specItem}>
+                <dt className={styles.specLabel}>Pages</dt>
+                <dd className={styles.specValue}>{NOTEBOOK_SPECS.pages}</dd>
+              </div>
+              <div className={styles.specItem}>
+                <dt className={styles.specLabel}>Paper</dt>
+                <dd className={styles.specValue}>{NOTEBOOK_SPECS.gsm} GSM</dd>
+              </div>
+              <div className={styles.specItemWide}>
+                <dt className={styles.specLabel}>Stock</dt>
+                <dd className={styles.specValue}>{NOTEBOOK_SPECS.paper}</dd>
+              </div>
+            </dl>
+
             <p className={styles.desc}>{design.description}</p>
+
+            <section className={styles.paperBlock} aria-labelledby="paper-title">
+              <h2 id="paper-title" className={styles.paperTitle}>
+                Andhra TruPrint Ultra (HB)
+              </h2>
+              <p className={styles.paperIntro}>{PAPER_INTRO}</p>
+
+              <div className={styles.accordion}>
+                <button
+                  type="button"
+                  className={styles.accordionBtn}
+                  aria-expanded={featuresOpen}
+                  onClick={() => setFeaturesOpen((o) => !o)}
+                >
+                  <span>Features</span>
+                  <span className={styles.accordionIcon} aria-hidden>
+                    {featuresOpen ? "−" : "+"}
+                  </span>
+                </button>
+                {featuresOpen ? (
+                  <ul className={styles.featureList}>
+                    {PAPER_FEATURES.map((feature) => (
+                      <li key={feature}>{feature}</li>
+                    ))}
+                  </ul>
+                ) : null}
+              </div>
+            </section>
 
             <div
               className={styles.sizes}

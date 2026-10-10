@@ -2,7 +2,11 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { NOTEBOOK_DESIGNS } from "@/lib/config/notebook-designs";
+import {
+  NOTEBOOK_DESIGNS,
+  NOTEBOOK_SPECS,
+  notebookSpecsLine,
+} from "@/lib/config/notebook-designs";
 import { formatINR } from "@/lib/commerce-client";
 import styles from "./ExploreCollection.module.css";
 
@@ -20,8 +24,10 @@ export function ExploreCollection() {
             Our notebooks
           </h2>
           <p className={styles.lead}>
-            7 unique designs · {formatINR(60)} each
+            7 unique designs · {NOTEBOOK_SPECS.pages} pages ·{" "}
+            {NOTEBOOK_SPECS.gsm} GSM · {formatINR(60)} each
           </p>
+          <p className={styles.paperLead}>{NOTEBOOK_SPECS.paper} paper</p>
         </header>
 
         <ul className={styles.grid}>
@@ -45,6 +51,7 @@ export function ExploreCollection() {
                 <div className={styles.body}>
                   <h3 className={styles.name}>{design.name}</h3>
                   <p className={styles.series}>{design.series}</p>
+                  <p className={styles.specs}>{notebookSpecsLine(true)}</p>
                   <span className={styles.price}>{formatINR(60)}</span>
                 </div>
               </Link>

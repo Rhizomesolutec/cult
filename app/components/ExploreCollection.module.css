@@ -40,6 +40,14 @@
   color: var(--cult-ash);
 }
 
+.paperLead {
+  margin: 0.35rem 0 0;
+  font-size: var(--text-2xs);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--cult-red-accent, #e91e32);
+}
+
 .grid {
   list-style: none;
   margin: 0;
@@ -110,6 +118,15 @@
   color: var(--cult-ash);
 }
 
+.specs {
+  margin: 0.15rem 0 0;
+  font-size: 0.625rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: rgba(232, 225, 215, 0.72);
+  line-height: 1.35;
+}
+
 .price {
   margin-top: auto;
   padding-top: 0.35rem;
@@ -142,6 +159,15 @@
 
   .name {
     font-size: clamp(0.85rem, 3.6vw, 1.05rem);
+  }
+
+  .specs {
+    font-size: 0.5625rem;
+    letter-spacing: 0.04em;
+  }
+
+  .paperLead {
+    font-size: 0.625rem;
   }
 
   .price {
