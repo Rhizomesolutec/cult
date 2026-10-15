@@ -25,7 +25,7 @@ const emptyForm = {
   slug: "",
   series: "",
   description: "",
-  price: "60",
+  price: "65",
   currency: "INR",
   image: "",
   stock: "50",

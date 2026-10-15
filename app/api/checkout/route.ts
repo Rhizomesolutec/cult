@@ -1,14 +1,40 @@
 import { NextResponse } from "next/server";
+import mongoose from "mongoose";
 import { connectDB } from "@/lib/db";
 import { getCartDTO } from "@/lib/cart-service";
 import {
   createOrderNumber,
   getOrCreateCartSessionId,
 } from "@/lib/commerce";
-import { Cart } from "@/lib/models/Cart";
 import { Order } from "@/lib/models/Order";
 import { Product } from "@/lib/models/Product";
-import mongoose from "mongoose";
+
+const REUSE_WINDOW_MS = 30 * 60 * 1000;
+
+function cartFingerprint(
+  items: { productId: string; quantity: number; price: number }[],
+  subtotal: number,
+) {
+  const lines = items
+    .map((i) => `${i.productId}:${i.quantity}:${i.price}`)
+    .sort()
+    .join("|");
+  return `${lines}|${subtotal}`;
+}
+
+function orderFingerprint(order: {
+  items: { productId: unknown; quantity: number; unitPrice: number }[];
+  subtotal: number;
+}) {
+  const lines = order.items
+    .map(
+      (i) =>
+        `${String(i.productId)}:${i.quantity}:${i.unitPrice}`,
+    )
+    .sort()
+    .join("|");
+  return `${lines}|${order.subtotal}`;
+}
 
 export async function POST(req: Request) {
   try {
@@ -53,6 +79,32 @@ export async function POST(req: Request) {
       }
     }
 
+    const fingerprint = cartFingerprint(cart.items, cart.subtotal);
+    const reuseAfter = new Date(Date.now() - REUSE_WINDOW_MS);
+
+    // Avoid duplicate pending orders on double-submit / retry.
+    const existing = await Order.findOne({
+      sessionId,
+      status: "pending_payment",
+      fulfillmentStatus: "awaiting_payment",
+      createdAt: { $gte: reuseAfter },
+    }).sort({ createdAt: -1 });
+
+    if (existing && orderFingerprint(existing) === fingerprint) {
+      existing.customer = { name, email, phone, address, city, pincode };
+      await existing.save();
+      return NextResponse.json({
+        order: {
+          id: String(existing._id),
+          orderNumber: existing.orderNumber,
+          subtotal: existing.subtotal,
+          currency: existing.currency,
+          status: existing.status,
+          reused: true,
+        },
+      });
+    }
+
     const order = await Order.create({
       orderNumber: createOrderNumber(),
       sessionId,
@@ -68,7 +120,18 @@ export async function POST(req: Request) {
       currency: cart.currency,
       status: "pending_payment",
       fulfillmentStatus: "awaiting_payment",
-      payment: { provider: "whatsapp", demoRef: "", gatewayPaymentId: "" },
+      payment: {
+        provider: "nttdata",
+        demoRef: "",
+        gatewayPaymentId: "",
+        merchTxnId: "",
+        merchTxnDate: "",
+        atomTokenId: "",
+        atomTxnId: "",
+        bankTxnId: "",
+        lastStatusCode: "",
+        lastStatusMessage: "",
+      },
       delivery: {
         agencyName: process.env.DELIVERY_AGENCY_NAME?.trim() || "",
         agencyEmail: process.env.DELIVERY_AGENCY_EMAIL?.trim() || "",

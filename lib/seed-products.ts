@@ -5,10 +5,18 @@ import {
 } from "@/lib/config/notebook-designs";
 import { Product } from "@/lib/models/Product";
 
-const BASE_PRICE = 60;
+/** All notebooks (standard + limited) are ₹65 including at payment time. */
+const BOOK_PRICE = 65;
 
-function productDescription(designDescription: string, a4 = false): string {
-  const base = `${designDescription} ${notebookSpecsLine()}.`;
+function priceForDesign(_limitedEdition?: boolean): number {
+  return BOOK_PRICE;
+}
+
+function productDescription(
+  design: (typeof NOTEBOOK_DESIGNS)[number],
+  a4 = false,
+): string {
+  const base = `${design.description} ${notebookSpecsLine(design)}.`;
   if (!a4) return base;
   return `${base} Available in A4 format for larger spreads and heavier writing sessions.`;
 }
@@ -17,15 +25,16 @@ function buildSeedProducts() {
   const products = [];
 
   for (const design of NOTEBOOK_DESIGNS) {
+    const price = priceForDesign(design.limitedEdition);
     products.push({
       slug: design.normalSlug,
       name: design.name,
       series: design.series,
-      description: productDescription(design.description),
-      price: BASE_PRICE,
+      description: productDescription(design),
+      price,
       currency: "INR",
       image: design.image,
-      stock: 50,
+      stock: design.limitedEdition ? 25 : 50,
       featured: Boolean(design.featured),
       active: true,
       designSlug: design.designSlug,
@@ -36,11 +45,11 @@ function buildSeedProducts() {
       slug: design.a4Slug,
       name: `${design.name} — A4`,
       series: design.series,
-      description: productDescription(design.description, true),
-      price: BASE_PRICE,
+      description: productDescription(design, true),
+      price,
       currency: "INR",
       image: design.image,
-      stock: 40,
+      stock: 0,
       featured: Boolean(design.featured),
       active: true,
       designSlug: design.designSlug,
@@ -62,23 +71,36 @@ export async function seedProductsIfEmpty() {
     return { seeded: true, count: SEED_PRODUCTS.length };
   }
 
-  await Product.updateMany({}, { $set: { price: BASE_PRICE } });
+  await Product.updateMany({}, { $set: { price: BOOK_PRICE } });
+  /** A4 sizes are currently unavailable. */
+  await Product.updateMany({ size: "a4" }, { $set: { stock: 0 } });
+  await Product.updateMany(
+    { slug: { $regex: /-a4$/ } },
+    { $set: { stock: 0 } },
+  );
 
   for (const design of NOTEBOOK_DESIGNS) {
+    const price = priceForDesign(design.limitedEdition);
     await Product.updateOne(
       { slug: design.normalSlug },
       {
         $set: {
           image: design.image,
-          price: BASE_PRICE,
+          price,
           designSlug: design.designSlug,
           size: "normal",
           name: design.name,
           series: design.series,
-          description: productDescription(design.description),
+          description: productDescription(design),
+          featured: Boolean(design.featured),
+          active: true,
+        },
+        $setOnInsert: {
+          stock: design.limitedEdition ? 25 : 50,
+          currency: "INR",
         },
       },
-      { upsert: false },
+      { upsert: true },
     );
 
     await Product.updateOne(
@@ -86,20 +108,23 @@ export async function seedProductsIfEmpty() {
       {
         $set: {
           image: design.image,
-          price: BASE_PRICE,
+          price,
           designSlug: design.designSlug,
           size: "a4",
           name: `${design.name} — A4`,
           series: design.series,
-          description: productDescription(design.description, true),
-          stock: 40,
+          description: productDescription(design, true),
+          stock: 0,
           featured: Boolean(design.featured),
           active: true,
+        },
+        $setOnInsert: {
+          currency: "INR",
         },
       },
       { upsert: true },
     );
   }
 
-  return { seeded: false, count };
+  return { seeded: false, count: await Product.countDocuments() };
 }

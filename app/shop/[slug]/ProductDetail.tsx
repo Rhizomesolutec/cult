@@ -10,6 +10,8 @@ import {
   NOTEBOOK_SPECS,
   PAPER_FEATURES,
   PAPER_INTRO,
+  notebookSpecsLine,
+  pageStyleLabel,
   sizeLabel,
   type NotebookDesignConfig,
   type NotebookSize,
@@ -95,7 +97,10 @@ export function ProductDetail({ design, initialSize }: ProductDetailProps) {
           </div>
 
           <div className={styles.details}>
-            <span className={styles.series}>{design.series}</span>
+            <span className={styles.series}>
+              {design.series}
+              {design.limitedEdition ? " · Limited" : ""}
+            </span>
             <h1 className={styles.title}>{design.name}</h1>
             <p className={styles.subtitle}>{design.subtitle}</p>
 
@@ -103,6 +108,12 @@ export function ProductDetail({ design, initialSize }: ProductDetailProps) {
               <div className={styles.specItem}>
                 <dt className={styles.specLabel}>Pages</dt>
                 <dd className={styles.specValue}>{NOTEBOOK_SPECS.pages}</dd>
+              </div>
+              <div className={styles.specItem}>
+                <dt className={styles.specLabel}>Ruling</dt>
+                <dd className={styles.specValue}>
+                  {pageStyleLabel(design.pageStyle)}
+                </dd>
               </div>
               <div className={styles.specItem}>
                 <dt className={styles.specLabel}>Paper</dt>
@@ -113,6 +124,14 @@ export function ProductDetail({ design, initialSize }: ProductDetailProps) {
                 <dd className={styles.specValue}>{NOTEBOOK_SPECS.paper}</dd>
               </div>
             </dl>
+
+            <p className={styles.pageCallout}>
+              This notebook has{" "}
+              <strong>
+                {design.pageStyle === "lined" ? "lined pages" : "plain pages"}
+              </strong>
+              . {notebookSpecsLine(design, true)}.
+            </p>
 
             <p className={styles.desc}>{design.description}</p>
 
@@ -167,7 +186,7 @@ export function ProductDetail({ design, initialSize }: ProductDetailProps) {
 
             <div className={styles.row}>
               <span className={styles.price}>
-                {formatINR(product?.price ?? 60)}
+                {formatINR(product?.price ?? 65)}
               </span>
               <span className={styles.stock}>
                 {product

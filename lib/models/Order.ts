@@ -57,6 +57,16 @@ export type OrderAttrs = {
     demoRef: string;
     gatewayPaymentId?: string;
     paidAt?: Date;
+    /** NTT DATA / Atom merchant transaction id */
+    merchTxnId?: string;
+    /** yyyy-MM-dd used by Status/Requery API */
+    merchTxnDate?: string;
+    atomTokenId?: string;
+    atomTxnId?: string;
+    bankTxnId?: string;
+    lastStatusCode?: string;
+    lastStatusMessage?: string;
+    verifiedAt?: Date;
   };
   delivery: {
     agencyName: string;
@@ -148,6 +158,14 @@ const OrderSchema = new Schema<OrderAttrs>(
       demoRef: { type: String, default: "" },
       gatewayPaymentId: { type: String, default: "" },
       paidAt: { type: Date },
+      merchTxnId: { type: String, default: "" },
+      merchTxnDate: { type: String, default: "" },
+      atomTokenId: { type: String, default: "" },
+      atomTxnId: { type: String, default: "" },
+      bankTxnId: { type: String, default: "" },
+      lastStatusCode: { type: String, default: "" },
+      lastStatusMessage: { type: String, default: "" },
+      verifiedAt: { type: Date },
     },
     delivery: {
       agencyName: { type: String, default: "" },
@@ -160,6 +178,17 @@ const OrderSchema = new Schema<OrderAttrs>(
     emailLog: { type: [EmailLogSchema], default: [] },
   },
   { timestamps: true },
+);
+
+// Unique only when a real merchant txn id is present (empty string allowed on create).
+OrderSchema.index(
+  { "payment.merchTxnId": 1 },
+  {
+    unique: true,
+    partialFilterExpression: {
+      "payment.merchTxnId": { $type: "string", $gt: "" },
+    },
+  },
 );
 
 export type OrderDocument = HydratedDocument<OrderAttrs>;

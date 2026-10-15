@@ -18,25 +18,37 @@ export const HOME_PRODUCTS = [
     slug: "legends-line",
     title: "The Legends line",
     description:
-      "Premium hardcovers with finishes inspired by the era when album art was sacred. Your space for lyrics, riffs, and real ideas.",
+      "Premium hardcovers with album-art energy. Lined pages for lyrics, riffs, and real ideas.",
     image: "/page1.png",
-    fallbackPrice: 60,
+    fallbackPrice: 65,
+    pageStyle: "Lined pages",
   },
   {
     slug: "studio-sketch",
     title: "Studio & sketch",
     description:
-      "Lay-flat pages for sketches, setlists, and setpiece notes. Built for dorms, studios, and late-night writing sessions.",
+      "Lay-flat plain pages for sketches, setlists, and setpiece notes — freeform creator space.",
     image: "/page2.png",
-    fallbackPrice: 60,
+    fallbackPrice: 65,
+    pageStyle: "Plain pages",
   },
   {
     slug: "tour-edition",
     title: "Tour edition",
     description:
-      "Durable, road-ready build—because ideas don’t wait for a desk. Every cover tells a story worth carrying forward.",
+      "Road-ready durability with lined pages — because ideas don’t wait for a desk.",
     image: "/page3.png",
-    fallbackPrice: 60,
+    fallbackPrice: 65,
+    pageStyle: "Lined pages",
+  },
+  {
+    slug: "never-free-never-me",
+    title: "Never Free, Never Me",
+    description:
+      "New CultScribe drop — raw cover energy with lined pages for everyday writing.",
+    image: "/cultscribenew.jpeg",
+    fallbackPrice: 65,
+    pageStyle: "Lined pages",
   },
 ] as const;
 
@@ -140,8 +152,8 @@ export function HomeProductsSection({
             Featured notebooks
           </motion.h2>
           <motion.p className={styles.lead} variants={inViewChild}>
-            Three covers from the CultScribe lineup — add to cart here, or open
-            the full shop for the complete collection.
+            Featured covers from the CultScribe lineup — including lined and
+            plain interiors. Add to cart here, or open the full shop.
           </motion.p>
         </motion.div>
 
@@ -180,7 +192,9 @@ export function HomeProductsSection({
                 <span className={styles.cardNum}>Series {item.id}</span>
                 <h3 className={styles.cardTitle}>{item.title}</h3>
                 <p className={styles.cardDesc}>{item.description}</p>
-                <p className={styles.cardTag}>{formatINR(item.price)}</p>
+                <p className={styles.cardTag}>
+                  {formatINR(item.price)} · {item.pageStyle}
+                </p>
                 <div className={styles.productActions}>
                   <button
                     type="button"

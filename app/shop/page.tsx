@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { SiteHeader } from "@/app/components/SiteHeader";
 import { useCart } from "@/components/CartProvider";
 import {
@@ -12,6 +12,50 @@ import {
 import { formatINR } from "@/lib/commerce-client";
 import type { ProductDTO } from "@/lib/types/commerce";
 import styles from "./page.module.css";
+
+function ProductCard({
+  product,
+  busyId,
+  onAdd,
+}: {
+  product: ProductDTO;
+  busyId: string | null;
+  onAdd: (productId: string) => void;
+}) {
+  return (
+    <article className={styles.card}>
+      <div className={styles.cover}>
+        <Image
+          src={product.image}
+          alt={product.name}
+          fill
+          className={styles.coverImg}
+          sizes="(max-width: 639px) 50vw, (max-width: 899px) 50vw, 320px"
+        />
+      </div>
+      <div className={styles.body}>
+        <span className={styles.series}>{product.series}</span>
+        <h2 className={styles.name}>{product.name}</h2>
+        <p className={styles.specsMeta}>{notebookSpecsLine(true)}</p>
+        <p className={styles.desc}>{product.description}</p>
+        <div className={styles.row}>
+          <span className={styles.price}>{formatINR(product.price)}</span>
+          <span className={styles.stock}>
+            {product.stock > 0 ? `${product.stock} in stock` : "Sold out"}
+          </span>
+        </div>
+        <button
+          type="button"
+          className={styles.btn}
+          disabled={product.stock < 1 || busyId === product.id}
+          onClick={() => onAdd(product.id)}
+        >
+          {busyId === product.id ? "Adding…" : "Add to cart"}
+        </button>
+      </div>
+    </article>
+  );
+}
 
 export default function ShopPage() {
   const router = useRouter();
@@ -43,6 +87,16 @@ export default function ShopPage() {
     };
   }, []);
 
+  const { normalProducts, a4Products } = useMemo(() => {
+    const normal: ProductDTO[] = [];
+    const a4: ProductDTO[] = [];
+    for (const p of products) {
+      if (p.size === "a4" || p.slug.endsWith("-a4")) a4.push(p);
+      else normal.push(p);
+    }
+    return { normalProducts: normal, a4Products: a4 };
+  }, [products]);
+
   const onAdd = async (productId: string) => {
     setBusyId(productId);
     setMessage("");
@@ -63,8 +117,8 @@ export default function ShopPage() {
         <h1 className={styles.title}>Notebooks like album art</h1>
         <p className={styles.lead}>
           Browse the CultScribe collection — {NOTEBOOK_SPECS.pages} pages,{" "}
-          {NOTEBOOK_SPECS.gsm} GSM, {NOTEBOOK_SPECS.paper} paper. Checkout via
-          WhatsApp.
+          {NOTEBOOK_SPECS.gsm} GSM, {NOTEBOOK_SPECS.paper} paper. Normal sizes
+          first, then A4.
         </p>
 
         {loading ? <p className={styles.status}>Loading products…</p> : null}
@@ -75,41 +129,57 @@ export default function ShopPage() {
           <p className={styles.empty}>No products yet.</p>
         ) : null}
 
-        <div className={styles.grid}>
-          {products.map((p) => (
-            <article key={p.id} className={styles.card}>
-              <div className={styles.cover}>
-                <Image
-                  src={p.image}
-                  alt={p.name}
-                  fill
-                  className={styles.coverImg}
-                  sizes="(max-width: 639px) 50vw, (max-width: 899px) 50vw, 320px"
+        {normalProducts.length > 0 ? (
+          <section
+            className={styles.sizeSection}
+            aria-labelledby="shop-normal-title"
+          >
+            <header className={styles.sizeHeader}>
+              <h2 id="shop-normal-title" className={styles.sizeTitle}>
+                Normal notebooks
+              </h2>
+              <p className={styles.sizeLead}>
+                Standard size — {normalProducts.length} designs
+              </p>
+            </header>
+            <div className={styles.grid}>
+              {normalProducts.map((p) => (
+                <ProductCard
+                  key={p.id}
+                  product={p}
+                  busyId={busyId}
+                  onAdd={(id) => void onAdd(id)}
                 />
-              </div>
-              <div className={styles.body}>
-                <span className={styles.series}>{p.series}</span>
-                <h2 className={styles.name}>{p.name}</h2>
-                <p className={styles.specsMeta}>{notebookSpecsLine(true)}</p>
-                <p className={styles.desc}>{p.description}</p>
-                <div className={styles.row}>
-                  <span className={styles.price}>{formatINR(p.price)}</span>
-                  <span className={styles.stock}>
-                    {p.stock > 0 ? `${p.stock} in stock` : "Sold out"}
-                  </span>
-                </div>
-                <button
-                  type="button"
-                  className={styles.btn}
-                  disabled={p.stock < 1 || busyId === p.id}
-                  onClick={() => void onAdd(p.id)}
-                >
-                  {busyId === p.id ? "Adding…" : "Add to cart"}
-                </button>
-              </div>
-            </article>
-          ))}
-        </div>
+              ))}
+            </div>
+          </section>
+        ) : null}
+
+        {a4Products.length > 0 ? (
+          <section
+            className={styles.sizeSection}
+            aria-labelledby="shop-a4-title"
+          >
+            <header className={styles.sizeHeader}>
+              <h2 id="shop-a4-title" className={styles.sizeTitle}>
+                A4 notebooks
+              </h2>
+              <p className={styles.sizeLead}>
+                Larger format — {a4Products.length} designs
+              </p>
+            </header>
+            <div className={styles.grid}>
+              {a4Products.map((p) => (
+                <ProductCard
+                  key={p.id}
+                  product={p}
+                  busyId={busyId}
+                  onAdd={(id) => void onAdd(id)}
+                />
+              ))}
+            </div>
+          </section>
+        ) : null}
       </main>
     </>
   );

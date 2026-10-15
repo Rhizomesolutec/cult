@@ -93,7 +93,10 @@
 
 .btn {
   display: inline-flex;
+  align-items: center;
+  justify-content: center;
   padding: 0.85rem 1.25rem;
+  border: none;
   background: var(--cult-red);
   color: #fff;
   text-decoration: none;
@@ -101,6 +104,12 @@
   font-weight: 600;
   letter-spacing: var(--tracking-btn);
   text-transform: uppercase;
+  cursor: pointer;
+}
+
+.btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 .btnGhost {

@@ -171,68 +171,98 @@ export const SHOWCASE_GALLERY_ITEMS: readonly GalleryItem[] = [
 export const COLLECTION_GALLERY_ITEMS: readonly GalleryItem[] = [
   {
     common: "The Legends Line",
-    binomial: "Series 01",
+    binomial: "Series 01 · Lined pages",
     photo: {
       url: "/page1.png",
-      text: "CultScribe The Legends Line notebook cover",
+      text: "CultScribe The Legends Line notebook cover — lined pages",
       by: "CultScribe",
     },
   },
   {
     common: "Studio & Sketch",
-    binomial: "Series 02",
+    binomial: "Series 02 · Plain pages",
     photo: {
       url: "/page2.png",
-      text: "CultScribe Studio & Sketch notebook cover",
+      text: "CultScribe Studio & Sketch notebook cover — plain pages",
       by: "CultScribe",
     },
   },
   {
     common: "Tour Edition",
-    binomial: "Series 03",
+    binomial: "Series 03 · Lined pages",
     photo: {
       url: "/page3.png",
-      text: "CultScribe Tour Edition notebook cover",
+      text: "CultScribe Tour Edition notebook cover — lined pages",
       by: "CultScribe",
     },
   },
   {
     common: "Prince of Darkness",
-    binomial: "The Legends Line",
+    binomial: "The Legends Line · Plain pages",
     photo: {
       url: "/cultscribe%205.jpg",
-      text: "CultScribe Prince of Darkness notebook",
+      text: "CultScribe Prince of Darkness notebook — plain pages",
       pos: "50% 35%",
       by: "CultScribe",
     },
   },
   {
     common: "GNR Was Here",
-    binomial: "Studio & Sketch",
+    binomial: "Studio & Sketch · Plain pages",
     photo: {
       url: "/cultscribe%208.jpg",
-      text: "CultScribe GNR Was Here notebook",
+      text: "CultScribe GNR Was Here notebook — plain pages",
       pos: "50% 40%",
       by: "CultScribe",
     },
   },
   {
     common: "Minutes to Midnight",
-    binomial: "Tour Edition",
+    binomial: "Tour Edition · Lined pages",
     photo: {
       url: "/cultscribe%2022.jpg",
-      text: "CultScribe Minutes to Midnight notebook cover",
+      text: "CultScribe Minutes to Midnight notebook cover — lined pages",
       pos: "50% 30%",
       by: "CultScribe",
     },
   },
   {
     common: "Midnight Sessions",
-    binomial: "Series 04",
+    binomial: "Series 04 · Plain pages",
     photo: {
       url: "/cultscribe%2011.jpg",
-      text: "CultScribe Midnight Sessions notebook",
+      text: "CultScribe Midnight Sessions notebook — plain pages",
       pos: "55% 45%",
+      by: "CultScribe",
+    },
+  },
+  {
+    common: "Never Free, Never Me",
+    binomial: "New Drop · Lined pages",
+    photo: {
+      url: "/cultscribenew.jpeg",
+      text: "CultScribe Never Free, Never Me notebook — lined pages",
+      pos: "50% 40%",
+      by: "CultScribe",
+    },
+  },
+  {
+    common: "Keep It Raw",
+    binomial: "Limited Edition · Lined pages",
+    photo: {
+      url: "/limited-edition-design-1.jpg",
+      text: "CultScribe Keep It Raw limited edition — lined pages",
+      pos: "50% 35%",
+      by: "CultScribe",
+    },
+  },
+  {
+    common: "Metal Stage",
+    binomial: "Limited Edition · Lined pages",
+    photo: {
+      url: "/limited-edition-2-close.jpg",
+      text: "CultScribe Metal Stage limited edition — lined pages",
+      pos: "50% 35%",
       by: "CultScribe",
     },
   },

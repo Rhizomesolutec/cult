@@ -112,6 +112,21 @@
   word-break: break-word;
 }
 
+.pageCallout {
+  margin: 0.5rem 0 0;
+  padding: 0.7rem 0.75rem;
+  border-left: 3px solid var(--cult-red-accent, #e91e32);
+  background: rgba(233, 30, 50, 0.08);
+  font-size: var(--text-sm);
+  color: var(--cult-cream-warm, #e8e1d7);
+  max-width: 36rem;
+}
+
+.pageCallout strong {
+  font-weight: 700;
+  text-transform: lowercase;
+}
+
 .desc {
   margin: 0.35rem 0 0.5rem;
   font-size: var(--text-sm);

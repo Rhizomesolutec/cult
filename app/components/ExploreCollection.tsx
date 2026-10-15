@@ -3,9 +3,11 @@
 import Image from "next/image";
 import Link from "next/link";
 import {
+  DESIGN_COUNT,
   NOTEBOOK_DESIGNS,
   NOTEBOOK_SPECS,
   notebookSpecsLine,
+  pageStyleLabel,
 } from "@/lib/config/notebook-designs";
 import { formatINR } from "@/lib/commerce-client";
 import styles from "./ExploreCollection.module.css";
@@ -24,10 +26,15 @@ export function ExploreCollection() {
             Our notebooks
           </h2>
           <p className={styles.lead}>
-            7 unique designs · {NOTEBOOK_SPECS.pages} pages ·{" "}
-            {NOTEBOOK_SPECS.gsm} GSM · {formatINR(60)} each
+            {DESIGN_COUNT} unique designs · {NOTEBOOK_SPECS.pages} pages ·{" "}
+            {NOTEBOOK_SPECS.gsm} GSM · from {formatINR(65)}
           </p>
           <p className={styles.paperLead}>{NOTEBOOK_SPECS.paper} paper</p>
+          <p className={styles.pageHint}>
+            Lined pages: Legends Line, Tour Edition, Minutes to Midnight, Never
+            Free Never Me, and Limited Editions. All other covers use plain
+            (unruled) pages.
+          </p>
         </header>
 
         <ul className={styles.grid}>
@@ -46,13 +53,21 @@ export function ExploreCollection() {
                     sizes="(max-width: 639px) 50vw, (max-width: 959px) 33vw, 280px"
                     className={styles.image}
                   />
+                  {design.limitedEdition ? (
+                    <span className={styles.limitedBadge}>Limited</span>
+                  ) : null}
                 </div>
 
                 <div className={styles.body}>
                   <h3 className={styles.name}>{design.name}</h3>
                   <p className={styles.series}>{design.series}</p>
-                  <p className={styles.specs}>{notebookSpecsLine(true)}</p>
-                  <span className={styles.price}>{formatINR(60)}</span>
+                  <p className={styles.specs}>{notebookSpecsLine(design, true)}</p>
+                  <p className={styles.pageStyle}>
+                    {pageStyleLabel(design.pageStyle)}
+                  </p>
+                  <span className={styles.price}>
+                    {formatINR(65)}
+                  </span>
                 </div>
               </Link>
             </li>

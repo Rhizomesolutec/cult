@@ -12,6 +12,13 @@
 .env*.local
 .env.local
 
+# local NDPS integration docs (not part of the app)
+.nttdata-docs/
+
+# Raw HEIC limited-edition sources (use converted limited-edition-*.jpg instead)
+/public/Limited edition*
+/public/limited edition*
+
 # uploaded product images
 /public/uploads/products/*
 !/public/uploads/products/.gitkeep

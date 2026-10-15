@@ -7,6 +7,7 @@ import { CollectionStats } from "./components/CollectionStats";
 import { ExploreCollection } from "./components/ExploreCollection";
 import { HeroNotebook } from "./components/HeroNotebook";
 import { HomeProductsSection } from "./components/HomeProductsSection";
+import { LimitedEditionSection } from "./components/LimitedEditionSection";
 import { LedgerSection } from "./components/LedgerSection";
 import {
   PosterSlider,
@@ -99,6 +100,8 @@ export default function Home() {
         <HeroNotebook />
 
         <ExploreCollection />
+
+        <LimitedEditionSection />
 
         <CollectionStats />
 

@@ -36,6 +36,29 @@
   color: var(--cult-ash);
 }
 
+.sizeSection {
+  margin-bottom: 3rem;
+}
+
+.sizeHeader {
+  margin-bottom: 1.25rem;
+}
+
+.sizeTitle {
+  margin: 0 0 0.35rem;
+  font-family: var(--cult-display);
+  font-size: clamp(1.35rem, 3vw, 1.75rem);
+  letter-spacing: var(--tracking-display);
+  text-transform: uppercase;
+  color: var(--cult-cream);
+}
+
+.sizeLead {
+  margin: 0;
+  font-size: var(--text-sm);
+  color: var(--cult-ash);
+}
+
 .grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));

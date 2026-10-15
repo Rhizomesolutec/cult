@@ -13,8 +13,14 @@ export async function GET() {
       .sort({ featured: -1, createdAt: 1 })
       .lean();
 
+    // Normal notebooks first, then A4 — keep relative order within each group.
+    const sizeRank = (size?: string) => (size === "a4" ? 1 : 0);
+    const ordered = [...products].sort(
+      (a, b) => sizeRank(a.size) - sizeRank(b.size),
+    );
+
     return NextResponse.json({
-      products: products.map((p) => toProductDTO(p)),
+      products: ordered.map((p) => toProductDTO(p)),
     });
   } catch (error) {
     console.error("[GET /api/products]", error);
