@@ -250,7 +250,7 @@ export const COLLECTION_GALLERY_ITEMS: readonly GalleryItem[] = [
     common: "Keep It Raw",
     binomial: "Special Edition · Lined pages",
     photo: {
-      url: "/limited-edition-design-1.jpg",
+      url: "/limited-edition-1-close.jpg",
       text: "CultScribe Keep It Raw special edition — lined pages",
       pos: "50% 35%",
       by: "CultScribe",
@@ -260,7 +260,7 @@ export const COLLECTION_GALLERY_ITEMS: readonly GalleryItem[] = [
     common: "Metal Stage",
     binomial: "Special Edition · Lined pages",
     photo: {
-      url: "/limited-edition-2-close.jpg",
+      url: "/limited-edition-2-alt.jpg",
       text: "CultScribe Metal Stage special edition — lined pages",
       pos: "50% 35%",
       by: "CultScribe",

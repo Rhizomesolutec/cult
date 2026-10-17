@@ -62,7 +62,7 @@ export function SpecialEditionPopup() {
           src={POPUP_IMAGE.src}
           alt={POPUP_IMAGE.alt}
           fill
-          sizes="120px"
+          sizes="(max-width: 480px) 44px, 60px"
           className={styles.img}
         />
       </div>
@@ -70,7 +70,7 @@ export function SpecialEditionPopup() {
         <p className={styles.eyebrow}>Special Edition</p>
         <p className={styles.title}>Metal Book Series</p>
         <p className={styles.copy}>
-          Scarce covers · normal size only · {formatINR(SPECIAL_EDITION_PRICE)}
+          Normal only · {formatINR(SPECIAL_EDITION_PRICE)}
         </p>
         <div className={styles.actions}>
           <Link

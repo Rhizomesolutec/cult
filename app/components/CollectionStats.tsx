@@ -35,12 +35,12 @@ export function CollectionStats() {
           <motion.div
             key={stat.label}
             className={styles.stat}
-            initial={reduceMotion ? { opacity: 0 } : { opacity: 0, y: 28 }}
+            initial={reduceMotion ? { opacity: 0 } : { opacity: 0, y: 12 }}
             whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: "-40px" }}
+            viewport={{ once: true, margin: "-20px" }}
             transition={{
-              duration: 0.6,
-              delay: reduceMotion ? 0 : index * 0.1,
+              duration: 0.4,
+              delay: reduceMotion ? 0 : index * 0.06,
               ease: EASE_OUT,
             }}
           >
