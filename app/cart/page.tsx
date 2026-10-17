@@ -81,6 +81,14 @@ export default function CartPage() {
 
         {cart.items.length > 0 ? (
           <div className={styles.footer}>
+            {cart.comboMessage ? (
+              <p className={styles.comboNote}>{cart.comboMessage}</p>
+            ) : null}
+            {cart.comboApplied && cart.comboSavings ? (
+              <p className={styles.comboSave}>
+                Combo savings · −{formatINR(cart.comboSavings)}
+              </p>
+            ) : null}
             <p className={styles.subtotal}>
               Subtotal · {formatINR(cart.subtotal)}
             </p>

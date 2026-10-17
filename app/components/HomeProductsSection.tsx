@@ -7,7 +7,8 @@ import type { Variants } from "framer-motion";
 import { motion, useReducedMotion } from "framer-motion";
 import { useEffect, useMemo, useState } from "react";
 import { useCart } from "@/components/CartProvider";
-import { formatINR } from "@/lib/commerce-client";
+import { PriceTag } from "@/app/components/PriceTag";
+import { NORMAL_COMPARE_AT } from "@/lib/pricing";
 import type { ProductDTO } from "@/lib/types/commerce";
 import styles from "../page.module.css";
 
@@ -20,7 +21,7 @@ export const HOME_PRODUCTS = [
     description:
       "Premium hardcovers with album-art energy. Lined pages for lyrics, riffs, and real ideas.",
     image: "/page1.png",
-    fallbackPrice: 65,
+    fallbackPrice: 55,
     pageStyle: "Lined pages",
   },
   {
@@ -29,7 +30,7 @@ export const HOME_PRODUCTS = [
     description:
       "Lay-flat plain pages for sketches, setlists, and setpiece notes — freeform creator space.",
     image: "/page2.png",
-    fallbackPrice: 65,
+    fallbackPrice: 55,
     pageStyle: "Plain pages",
   },
   {
@@ -38,7 +39,7 @@ export const HOME_PRODUCTS = [
     description:
       "Road-ready durability with lined pages — because ideas don’t wait for a desk.",
     image: "/page3.png",
-    fallbackPrice: 65,
+    fallbackPrice: 55,
     pageStyle: "Lined pages",
   },
   {
@@ -47,7 +48,7 @@ export const HOME_PRODUCTS = [
     description:
       "New CultScribe drop — raw cover energy with lined pages for everyday writing.",
     image: "/cultscribenew.jpeg",
-    fallbackPrice: 65,
+    fallbackPrice: 55,
     pageStyle: "Lined pages",
   },
 ] as const;
@@ -193,7 +194,11 @@ export function HomeProductsSection({
                 <h3 className={styles.cardTitle}>{item.title}</h3>
                 <p className={styles.cardDesc}>{item.description}</p>
                 <p className={styles.cardTag}>
-                  {formatINR(item.price)} · {item.pageStyle}
+                  <PriceTag
+                    price={item.price}
+                    compareAt={NORMAL_COMPARE_AT}
+                  />{" "}
+                  · {item.pageStyle}
                 </p>
                 <div className={styles.productActions}>
                   <button

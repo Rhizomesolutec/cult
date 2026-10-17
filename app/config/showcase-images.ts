@@ -248,20 +248,20 @@ export const COLLECTION_GALLERY_ITEMS: readonly GalleryItem[] = [
   },
   {
     common: "Keep It Raw",
-    binomial: "Limited Edition · Lined pages",
+    binomial: "Special Edition · Lined pages",
     photo: {
       url: "/limited-edition-design-1.jpg",
-      text: "CultScribe Keep It Raw limited edition — lined pages",
+      text: "CultScribe Keep It Raw special edition — lined pages",
       pos: "50% 35%",
       by: "CultScribe",
     },
   },
   {
     common: "Metal Stage",
-    binomial: "Limited Edition · Lined pages",
+    binomial: "Special Edition · Lined pages",
     photo: {
       url: "/limited-edition-2-close.jpg",
-      text: "CultScribe Metal Stage limited edition — lined pages",
+      text: "CultScribe Metal Stage special edition — lined pages",
       pos: "50% 35%",
       by: "CultScribe",
     },

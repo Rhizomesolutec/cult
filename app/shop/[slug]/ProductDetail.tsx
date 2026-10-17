@@ -16,7 +16,12 @@ import {
   type NotebookDesignConfig,
   type NotebookSize,
 } from "@/lib/config/notebook-designs";
-import { formatINR } from "@/lib/commerce-client";
+import { PriceTag } from "@/app/components/PriceTag";
+import {
+  NORMAL_COMPARE_AT,
+  NORMAL_PRICE,
+  SPECIAL_EDITION_PRICE,
+} from "@/lib/pricing";
 import type { ProductDTO } from "@/lib/types/commerce";
 import styles from "./page.module.css";
 
@@ -54,7 +59,20 @@ export function ProductDetail({ design, initialSize }: ProductDetailProps) {
     };
   }, []);
 
-  const product = bySlug[size === "normal" ? design.normalSlug : design.a4Slug];
+  const availableSizes: NotebookSize[] = design.specialEdition
+    ? ["normal"]
+    : ["normal", "a4"];
+
+  const activeSize = availableSizes.includes(size) ? size : "normal";
+  const product =
+    bySlug[activeSize === "normal" ? design.normalSlug : design.a4Slug];
+
+  const fallbackPrice = design.specialEdition
+    ? SPECIAL_EDITION_PRICE
+    : NORMAL_PRICE;
+  const compareAt = design.specialEdition
+    ? null
+    : (product?.compareAtPrice ?? NORMAL_COMPARE_AT);
 
   const onAdd = async () => {
     if (!product) {
@@ -99,7 +117,7 @@ export function ProductDetail({ design, initialSize }: ProductDetailProps) {
           <div className={styles.details}>
             <span className={styles.series}>
               {design.series}
-              {design.limitedEdition ? " · Limited" : ""}
+              {design.specialEdition ? " · Special" : ""}
             </span>
             <h1 className={styles.title}>{design.name}</h1>
             <p className={styles.subtitle}>{design.subtitle}</p>
@@ -163,30 +181,42 @@ export function ProductDetail({ design, initialSize }: ProductDetailProps) {
               </div>
             </section>
 
-            <div
-              className={styles.sizes}
-              role="group"
-              aria-label={`${design.name} size`}
-            >
-              {(["normal", "a4"] as const).map((s) => (
-                <button
-                  key={s}
-                  type="button"
-                  className={size === s ? styles.sizeActive : styles.sizeBtn}
-                  aria-pressed={size === s}
-                  onClick={() => {
-                    setSize(s);
-                    setMessage("");
-                  }}
-                >
-                  {sizeLabel(s)}
-                </button>
-              ))}
-            </div>
+            {availableSizes.length > 1 ? (
+              <div
+                className={styles.sizes}
+                role="group"
+                aria-label={`${design.name} size`}
+              >
+                {availableSizes.map((s) => (
+                  <button
+                    key={s}
+                    type="button"
+                    className={
+                      activeSize === s ? styles.sizeActive : styles.sizeBtn
+                    }
+                    aria-pressed={activeSize === s}
+                    onClick={() => {
+                      setSize(s);
+                      setMessage("");
+                    }}
+                  >
+                    {sizeLabel(s)}
+                  </button>
+                ))}
+              </div>
+            ) : (
+              <p className={styles.pageCallout}>
+                <strong>Normal size only</strong> — Special Edition does not
+                include A4.
+              </p>
+            )}
 
             <div className={styles.row}>
               <span className={styles.price}>
-                {formatINR(product?.price ?? 65)}
+                <PriceTag
+                  price={product?.price ?? fallbackPrice}
+                  compareAt={compareAt}
+                />
               </span>
               <span className={styles.stock}>
                 {product

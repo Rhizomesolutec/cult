@@ -9,6 +9,14 @@ import {
   notebookSpecsLine,
   pageStyleLabel,
 } from "@/lib/config/notebook-designs";
+import {
+  COMBO_PACK_PRICE,
+  COMBO_PACK_SIZE,
+  NORMAL_COMPARE_AT,
+  NORMAL_PRICE,
+  SPECIAL_EDITION_PRICE,
+} from "@/lib/pricing";
+import { PriceTag } from "@/app/components/PriceTag";
 import { formatINR } from "@/lib/commerce-client";
 import styles from "./ExploreCollection.module.css";
 
@@ -27,15 +35,32 @@ export function ExploreCollection() {
           </h2>
           <p className={styles.lead}>
             {DESIGN_COUNT} unique designs · {NOTEBOOK_SPECS.pages} pages ·{" "}
-            {NOTEBOOK_SPECS.gsm} GSM · from {formatINR(65)}
+            {NOTEBOOK_SPECS.gsm} GSM · from {formatINR(NORMAL_PRICE)}
           </p>
           <p className={styles.paperLead}>{NOTEBOOK_SPECS.paper} paper</p>
           <p className={styles.pageHint}>
             Lined pages: Legends Line, Tour Edition, Minutes to Midnight, Never
-            Free Never Me, and Limited Editions. All other covers use plain
-            (unruled) pages.
+            Free Never Me, and Special Editions. All other covers use plain
+            (unruled) pages. Special Edition is normal size only — A4 is not
+            included.
           </p>
         </header>
+
+        <aside className={styles.combo} aria-labelledby="combo-title">
+          <p className={styles.comboEyebrow}>Combo pack · Normal books only</p>
+          <h3 id="combo-title" className={styles.comboTitle}>
+            {COMBO_PACK_SIZE} notebooks for {formatINR(COMBO_PACK_PRICE)}
+          </h3>
+          <p className={styles.comboCopy}>
+            Mix any normal-size covers (not Special Edition, not A4). One book is{" "}
+            {formatINR(NORMAL_PRICE)}; every {COMBO_PACK_SIZE} together are{" "}
+            {formatINR(COMBO_PACK_PRICE)} — then {formatINR(COMBO_PACK_PRICE * 2)},{" "}
+            {formatINR(COMBO_PACK_PRICE * 3)}, and so on.
+          </p>
+          <Link href="/shop" className={styles.comboCta}>
+            Build your pack
+          </Link>
+        </aside>
 
         <ul className={styles.grid}>
           {NOTEBOOK_DESIGNS.map((design) => (
@@ -53,20 +78,30 @@ export function ExploreCollection() {
                     sizes="(max-width: 639px) 50vw, (max-width: 959px) 33vw, 280px"
                     className={styles.image}
                   />
-                  {design.limitedEdition ? (
-                    <span className={styles.limitedBadge}>Limited</span>
+                  {design.specialEdition ? (
+                    <span className={styles.limitedBadge}>Special</span>
                   ) : null}
                 </div>
 
                 <div className={styles.body}>
                   <h3 className={styles.name}>{design.name}</h3>
                   <p className={styles.series}>{design.series}</p>
-                  <p className={styles.specs}>{notebookSpecsLine(design, true)}</p>
+                  <p className={styles.specs}>
+                    {notebookSpecsLine(design, true)}
+                  </p>
                   <p className={styles.pageStyle}>
                     {pageStyleLabel(design.pageStyle)}
+                    {design.specialEdition ? " · Normal only" : ""}
                   </p>
                   <span className={styles.price}>
-                    {formatINR(65)}
+                    {design.specialEdition ? (
+                      formatINR(SPECIAL_EDITION_PRICE)
+                    ) : (
+                      <PriceTag
+                        price={NORMAL_PRICE}
+                        compareAt={NORMAL_COMPARE_AT}
+                      />
+                    )}
                   </span>
                 </div>
               </Link>

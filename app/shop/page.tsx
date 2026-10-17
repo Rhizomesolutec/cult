@@ -9,9 +9,17 @@ import {
   NOTEBOOK_SPECS,
   notebookSpecsLine,
 } from "@/lib/config/notebook-designs";
+import { PriceTag } from "@/app/components/PriceTag";
+import {
+  COMBO_PACK_PRICE,
+  COMBO_PACK_SIZE,
+  NORMAL_PRICE,
+} from "@/lib/pricing";
 import { formatINR } from "@/lib/commerce-client";
 import type { ProductDTO } from "@/lib/types/commerce";
 import styles from "./page.module.css";
+
+type ShopFilter = "normal" | "special" | "a4";
 
 function ProductCard({
   product,
@@ -39,7 +47,12 @@ function ProductCard({
         <p className={styles.specsMeta}>{notebookSpecsLine(true)}</p>
         <p className={styles.desc}>{product.description}</p>
         <div className={styles.row}>
-          <span className={styles.price}>{formatINR(product.price)}</span>
+          <span className={styles.price}>
+            <PriceTag
+              price={product.price}
+              compareAt={product.compareAtPrice}
+            />
+          </span>
           <span className={styles.stock}>
             {product.stock > 0 ? `${product.stock} in stock` : "Sold out"}
           </span>
@@ -65,6 +78,7 @@ export default function ShopPage() {
   const [error, setError] = useState("");
   const [busyId, setBusyId] = useState<string | null>(null);
   const [message, setMessage] = useState("");
+  const [filter, setFilter] = useState<ShopFilter>("normal");
 
   useEffect(() => {
     let cancelled = false;
@@ -87,15 +101,54 @@ export default function ShopPage() {
     };
   }, []);
 
-  const { normalProducts, a4Products } = useMemo(() => {
+  const { normalProducts, specialProducts, a4Products } = useMemo(() => {
     const normal: ProductDTO[] = [];
+    const special: ProductDTO[] = [];
     const a4: ProductDTO[] = [];
     for (const p of products) {
-      if (p.size === "a4" || p.slug.endsWith("-a4")) a4.push(p);
+      const isA4 = p.size === "a4" || p.slug.endsWith("-a4");
+      // Special Edition is normal-only — hide any leftover A4 SKUs.
+      if (p.specialEdition && isA4) continue;
+      if (isA4) {
+        a4.push(p);
+        continue;
+      }
+      if (p.specialEdition) special.push(p);
       else normal.push(p);
     }
-    return { normalProducts: normal, a4Products: a4 };
+    return {
+      normalProducts: normal,
+      specialProducts: special,
+      a4Products: a4,
+    };
   }, [products]);
+
+  const filtered = useMemo(() => {
+    if (filter === "special") return specialProducts;
+    if (filter === "a4") return a4Products;
+    return normalProducts;
+  }, [filter, normalProducts, specialProducts, a4Products]);
+
+  const filterMeta: Record<
+    ShopFilter,
+    { title: string; lead: string; count: number }
+  > = {
+    normal: {
+      title: "Normal notebooks",
+      lead: "Standard size — combo packs apply here",
+      count: normalProducts.length,
+    },
+    special: {
+      title: "Special notebooks",
+      lead: "Special Edition · normal size only",
+      count: specialProducts.length,
+    },
+    a4: {
+      title: "A4 notebooks",
+      lead: "Larger format — not included in combo packs",
+      count: a4Products.length,
+    },
+  };
 
   const onAdd = async (productId: string) => {
     setBusyId(productId);
@@ -117,9 +170,45 @@ export default function ShopPage() {
         <h1 className={styles.title}>Notebooks like album art</h1>
         <p className={styles.lead}>
           Browse the CultScribe collection — {NOTEBOOK_SPECS.pages} pages,{" "}
-          {NOTEBOOK_SPECS.gsm} GSM, {NOTEBOOK_SPECS.paper} paper. Normal sizes
-          first, then A4.
+          {NOTEBOOK_SPECS.gsm} GSM, {NOTEBOOK_SPECS.paper} paper. Normal books
+          from {formatINR(NORMAL_PRICE)}. Combo: every {COMBO_PACK_SIZE} normal
+          notebooks for {formatINR(COMBO_PACK_PRICE)} (Special Edition &amp; A4
+          excluded).
         </p>
+
+        <div
+          className={styles.filters}
+          role="tablist"
+          aria-label="Shop category"
+        >
+          {(
+            [
+              ["normal", "Normal notebook"],
+              ["special", "Special notebook"],
+              ["a4", "A4"],
+            ] as const
+          ).map(([key, label]) => (
+            <button
+              key={key}
+              type="button"
+              role="tab"
+              aria-selected={filter === key}
+              className={
+                filter === key ? styles.filterActive : styles.filterBtn
+              }
+              onClick={() => setFilter(key)}
+            >
+              {label}
+              <span className={styles.filterCount}>
+                {key === "normal"
+                  ? normalProducts.length
+                  : key === "special"
+                    ? specialProducts.length
+                    : a4Products.length}
+              </span>
+            </button>
+          ))}
+        </div>
 
         {loading ? <p className={styles.status}>Loading products…</p> : null}
         {error ? <p className={styles.error}>{error}</p> : null}
@@ -129,55 +218,35 @@ export default function ShopPage() {
           <p className={styles.empty}>No products yet.</p>
         ) : null}
 
-        {normalProducts.length > 0 ? (
+        {!loading && !error && products.length > 0 ? (
           <section
             className={styles.sizeSection}
-            aria-labelledby="shop-normal-title"
+            aria-labelledby="shop-filter-title"
           >
             <header className={styles.sizeHeader}>
-              <h2 id="shop-normal-title" className={styles.sizeTitle}>
-                Normal notebooks
+              <h2 id="shop-filter-title" className={styles.sizeTitle}>
+                {filterMeta[filter].title}
               </h2>
               <p className={styles.sizeLead}>
-                Standard size — {normalProducts.length} designs
+                {filterMeta[filter].lead} — {filterMeta[filter].count} designs
               </p>
             </header>
-            <div className={styles.grid}>
-              {normalProducts.map((p) => (
-                <ProductCard
-                  key={p.id}
-                  product={p}
-                  busyId={busyId}
-                  onAdd={(id) => void onAdd(id)}
-                />
-              ))}
-            </div>
-          </section>
-        ) : null}
-
-        {a4Products.length > 0 ? (
-          <section
-            className={styles.sizeSection}
-            aria-labelledby="shop-a4-title"
-          >
-            <header className={styles.sizeHeader}>
-              <h2 id="shop-a4-title" className={styles.sizeTitle}>
-                A4 notebooks
-              </h2>
-              <p className={styles.sizeLead}>
-                Larger format — {a4Products.length} designs
+            {filtered.length > 0 ? (
+              <div className={styles.grid}>
+                {filtered.map((p) => (
+                  <ProductCard
+                    key={p.id}
+                    product={p}
+                    busyId={busyId}
+                    onAdd={(id) => void onAdd(id)}
+                  />
+                ))}
+              </div>
+            ) : (
+              <p className={styles.empty}>
+                No products in this category right now.
               </p>
-            </header>
-            <div className={styles.grid}>
-              {a4Products.map((p) => (
-                <ProductCard
-                  key={p.id}
-                  product={p}
-                  busyId={busyId}
-                  onAdd={(id) => void onAdd(id)}
-                />
-              ))}
-            </div>
+            )}
           </section>
         ) : null}
       </main>

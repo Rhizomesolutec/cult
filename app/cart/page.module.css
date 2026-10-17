@@ -133,6 +133,21 @@
   border-top: 1px solid var(--cult-border);
 }
 
+.comboNote {
+  flex: 1 1 100%;
+  margin: 0;
+  font-size: var(--text-sm);
+  color: var(--cult-ash);
+}
+
+.comboSave {
+  flex: 1 1 100%;
+  margin: 0;
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--cult-red-accent, #e91e32);
+}
+
 .subtotal {
   font-size: var(--text-lg);
   color: var(--cult-cream);

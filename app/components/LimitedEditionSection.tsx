@@ -3,37 +3,39 @@
 import Image from "next/image";
 import Link from "next/link";
 import {
-  LIMITED_EDITION_DESIGNS,
-  LIMITED_EDITION_SHOWCASE,
+  SPECIAL_EDITION_DESIGNS,
+  SPECIAL_EDITION_SHOWCASE,
   notebookSpecsLine,
   pageStyleLabel,
 } from "@/lib/config/notebook-designs";
+import { SPECIAL_EDITION_PRICE } from "@/lib/pricing";
 import { formatINR } from "@/lib/commerce-client";
 import styles from "./LimitedEditionSection.module.css";
-
-const LIMITED_PRICE = 65;
 
 export function LimitedEditionSection() {
   return (
     <section
-      id="limited-edition"
+      id="special-edition"
       className={styles.section}
-      aria-labelledby="limited-edition-title"
+      aria-labelledby="special-edition-title"
     >
       <div className={styles.inner}>
         <header className={styles.header}>
-          <span className={styles.eyebrow}>Limited Edition</span>
-          <h2 id="limited-edition-title" className={styles.title}>
+          <span className={styles.eyebrow}>Special Edition</span>
+          <h2 id="special-edition-title" className={styles.title}>
             Metal Book Series
           </h2>
           <p className={styles.lead}>
-            Two special-edition covers — scarce run, lined pages,{" "}
-            {formatINR(LIMITED_PRICE)} each.
+            Two special-edition covers — scarce run, lined pages, normal size
+            only (no A4). {formatINR(SPECIAL_EDITION_PRICE)} each.
           </p>
         </header>
 
-        <div className={styles.designStrip} aria-label="Limited edition design shots">
-          {LIMITED_EDITION_SHOWCASE.designShots.map((shot) => (
+        <div
+          className={styles.designStrip}
+          aria-label="Special edition design shots"
+        >
+          {SPECIAL_EDITION_SHOWCASE.designShots.map((shot) => (
             <div key={shot.src} className={styles.designShot}>
               <Image
                 src={shot.src}
@@ -47,8 +49,8 @@ export function LimitedEditionSection() {
         </div>
 
         <ul className={styles.grid}>
-          {LIMITED_EDITION_DESIGNS.map((design) => {
-            const showcase = LIMITED_EDITION_SHOWCASE.products.find(
+          {SPECIAL_EDITION_DESIGNS.map((design) => {
+            const showcase = SPECIAL_EDITION_SHOWCASE.products.find(
               (p) => p.designSlug === design.designSlug,
             );
             return (
@@ -56,7 +58,7 @@ export function LimitedEditionSection() {
                 <Link
                   href={`/shop/${design.designSlug}`}
                   className={styles.card}
-                  aria-label={`View ${design.name} limited edition`}
+                  aria-label={`View ${design.name} special edition`}
                 >
                   <div className={styles.imageWrap}>
                     <Image
@@ -66,7 +68,7 @@ export function LimitedEditionSection() {
                       sizes="(max-width: 639px) 90vw, 420px"
                       className={styles.image}
                     />
-                    <span className={styles.badge}>Limited</span>
+                    <span className={styles.badge}>Special</span>
                   </div>
                   <div className={styles.body}>
                     <h3 className={styles.name}>{design.name}</h3>
@@ -75,10 +77,10 @@ export function LimitedEditionSection() {
                       {notebookSpecsLine(design, true)}
                     </p>
                     <p className={styles.pageStyle}>
-                      {pageStyleLabel(design.pageStyle)}
+                      {pageStyleLabel(design.pageStyle)} · Normal only
                     </p>
                     <span className={styles.price}>
-                      {formatINR(LIMITED_PRICE)}
+                      {formatINR(SPECIAL_EDITION_PRICE)}
                     </span>
                   </div>
                   {showcase ? (
@@ -112,3 +114,6 @@ export function LimitedEditionSection() {
     </section>
   );
 }
+
+/** @deprecated Prefer LimitedEditionSection (now Special Edition branding). */
+export const SpecialEditionSection = LimitedEditionSection;

@@ -25,6 +25,10 @@ const emptyCart: CartDTO = {
   itemCount: 0,
   subtotal: 0,
   currency: "INR",
+  comboApplied: false,
+  comboSavings: 0,
+  comboEligibleCount: 0,
+  comboMessage: "",
 };
 
 const CartContext = createContext<CartContextValue | null>(null);

@@ -102,6 +102,19 @@
   color: #5c574f;
 }
 
+.comboNote {
+  margin: 0.5rem 0 0;
+  font-size: var(--text-sm);
+  color: #5c564e;
+}
+
+.comboSave {
+  margin: 0.35rem 0 0;
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--cult-red, #c41230);
+}
+
 .total {
   font-size: var(--text-lg);
   font-weight: 600;

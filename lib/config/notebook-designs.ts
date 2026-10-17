@@ -16,7 +16,8 @@ export type NotebookDesignConfig = {
   /** Interior ruling — lined or plain (unruled) pages */
   pageStyle: NotebookPageStyle;
   featured?: boolean;
-  limitedEdition?: boolean;
+  /** Special Edition — normal size only (no A4). */
+  specialEdition?: boolean;
 };
 
 /** Shared specs for every CultScribe notebook. */
@@ -61,7 +62,8 @@ export function notebookSpecsLine(
 /**
  * Notebook designs — each maps to two purchasable size variants.
  * Lined: Legends Line, Tour Edition, Minutes to Midnight, Never Free Never Me,
- * and both Limited Edition covers. All others are plain (unruled).
+ * and both Special Edition covers. All others are plain (unruled).
+ * Special Edition is normal-size only (no A4).
  */
 export const NOTEBOOK_DESIGNS: readonly NotebookDesignConfig[] = [
   {
@@ -167,35 +169,35 @@ export const NOTEBOOK_DESIGNS: readonly NotebookDesignConfig[] = [
   {
     designSlug: "limited-keep-it-raw",
     name: "Keep It Raw",
-    series: "Limited Edition",
+    series: "Special Edition",
     subtitle: "Special Edition · Metal Book Series",
     description:
-      "Limited special-edition cover — horns-up energy, Keep It Raw branding. Scarce run. Interior: lined pages.",
+      "Special-edition cover — horns-up energy, Keep It Raw branding. Scarce run. Normal size only. Interior: lined pages.",
     image: "/limited-edition-design-1.jpg",
     normalSlug: "limited-keep-it-raw",
     a4Slug: "limited-keep-it-raw-a4",
     pageStyle: "lined",
-    limitedEdition: true,
+    specialEdition: true,
     featured: true,
   },
   {
     designSlug: "limited-metal-stage",
     name: "Metal Stage",
-    series: "Limited Edition",
+    series: "Special Edition",
     subtitle: "Special Edition · Metal Book Series",
     description:
-      "Limited special-edition cover — dual-stage metal illustration from the CultScribe Metal Book Series. Scarce run. Interior: lined pages.",
+      "Special-edition cover — dual-stage metal illustration from the CultScribe Metal Book Series. Scarce run. Normal size only. Interior: lined pages.",
     image: "/limited-edition-2-close.jpg",
     normalSlug: "limited-metal-stage",
     a4Slug: "limited-metal-stage-a4",
     pageStyle: "lined",
-    limitedEdition: true,
+    specialEdition: true,
     featured: true,
   },
 ] as const;
 
-/** Extra art for the Limited Edition homepage section (not product SKUs). */
-export const LIMITED_EDITION_SHOWCASE = {
+/** Extra art for the Special Edition homepage section (not product SKUs). */
+export const SPECIAL_EDITION_SHOWCASE = {
   products: [
     {
       designSlug: "limited-keep-it-raw",
@@ -213,22 +215,27 @@ export const LIMITED_EDITION_SHOWCASE = {
   designShots: [
     {
       src: "/limited-edition-design-2.jpg",
-      alt: "CultScribe Limited Edition Metal Book Series — both special covers",
+      alt: "CultScribe Special Edition Metal Book Series — both special covers",
     },
     {
       src: "/limited-edition-design-4.jpg",
-      alt: "CultScribe Limited Edition pair — Metal Stage and Keep It Raw side by side",
+      alt: "CultScribe Special Edition pair — Metal Stage and Keep It Raw side by side",
     },
     {
       src: "/limited-edition-design-3.jpg",
-      alt: "CultScribe Limited Edition Metal Stage cover art",
+      alt: "CultScribe Special Edition Metal Stage cover art",
     },
   ],
 } as const;
 
-export const LIMITED_EDITION_DESIGNS = NOTEBOOK_DESIGNS.filter(
-  (d) => d.limitedEdition,
+export const SPECIAL_EDITION_DESIGNS = NOTEBOOK_DESIGNS.filter(
+  (d) => d.specialEdition,
 );
+
+/** @deprecated Use SPECIAL_EDITION_SHOWCASE */
+export const LIMITED_EDITION_SHOWCASE = SPECIAL_EDITION_SHOWCASE;
+/** @deprecated Use SPECIAL_EDITION_DESIGNS */
+export const LIMITED_EDITION_DESIGNS = SPECIAL_EDITION_DESIGNS;
 
 export const DESIGN_COUNT = NOTEBOOK_DESIGNS.length;
 export const SIZE_COUNT = 2;

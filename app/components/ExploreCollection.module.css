@@ -56,6 +56,57 @@
   color: rgba(232, 225, 215, 0.65);
 }
 
+.combo {
+  margin: 0 auto 2rem;
+  max-width: 40rem;
+  padding: 1.15rem 1.25rem;
+  border: 1px solid rgba(233, 30, 50, 0.35);
+  background:
+    linear-gradient(135deg, rgba(233, 30, 50, 0.12), transparent 55%),
+    #111;
+  text-align: center;
+}
+
+.comboEyebrow {
+  margin: 0 0 0.35rem;
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--cult-red-accent, #e91e32);
+}
+
+.comboTitle {
+  margin: 0 0 0.45rem;
+  font-family: var(--cult-display);
+  font-size: clamp(1.2rem, 3vw, 1.55rem);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--cult-cream-warm, #e8e1d7);
+}
+
+.comboCopy {
+  margin: 0 auto 0.85rem;
+  max-width: 34rem;
+  font-size: var(--text-2xs);
+  line-height: 1.5;
+  color: rgba(232, 225, 215, 0.75);
+}
+
+.comboCta {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.45rem 0.9rem;
+  border: 1px solid var(--cult-red-accent, #e91e32);
+  background: var(--cult-red-accent, #e91e32);
+  color: #fff;
+  text-decoration: none;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
 .limitedBadge {
   position: absolute;
   top: 0.5rem;

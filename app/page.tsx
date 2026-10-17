@@ -8,6 +8,7 @@ import { ExploreCollection } from "./components/ExploreCollection";
 import { HeroNotebook } from "./components/HeroNotebook";
 import { HomeProductsSection } from "./components/HomeProductsSection";
 import { LimitedEditionSection } from "./components/LimitedEditionSection";
+import { SpecialEditionPopup } from "./components/SpecialEditionPopup";
 import { LedgerSection } from "./components/LedgerSection";
 import {
   PosterSlider,
@@ -95,6 +96,7 @@ export default function Home() {
   return (
     <>
       <SiteHeader />
+      <SpecialEditionPopup />
 
       <main id="top">
         <HeroNotebook />

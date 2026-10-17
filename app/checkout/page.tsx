@@ -388,6 +388,14 @@ export default function CheckoutPage() {
                   </li>
                 ))}
               </ul>
+              {cart.comboMessage ? (
+                <p className={styles.comboNote}>{cart.comboMessage}</p>
+              ) : null}
+              {cart.comboApplied && cart.comboSavings ? (
+                <p className={styles.comboSave}>
+                  Combo savings · −{formatINR(cart.comboSavings)}
+                </p>
+              ) : null}
               <p className={styles.total}>Total · {formatINR(cart.subtotal)}</p>
             </div>
 
