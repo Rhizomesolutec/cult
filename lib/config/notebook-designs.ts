@@ -41,7 +41,7 @@ export const PAPER_FEATURES = [
 ] as const;
 
 export function pageStyleLabel(style: NotebookPageStyle): string {
-  return style === "lined" ? "Lined pages" : "Plain pages";
+  return style === "lined" ? "Ruled" : "Unruled";
 }
 
 export function notebookSpecsLine(
@@ -54,15 +54,15 @@ export function notebookSpecsLine(
     typeof designOrCompact === "boolean" ? designOrCompact : compact;
   const paper = isCompact ? NOTEBOOK_SPECS.paperShort : NOTEBOOK_SPECS.paper;
   const pages = design
-    ? `${NOTEBOOK_SPECS.pages} ${design.pageStyle === "lined" ? "lined" : "plain"} pages`
+    ? `${NOTEBOOK_SPECS.pages} ${design.pageStyle === "lined" ? "ruled" : "unruled"} pages`
     : `${NOTEBOOK_SPECS.pages} pages`;
   return `${pages} · ${NOTEBOOK_SPECS.gsm} GSM · ${paper}`;
 }
 
 /**
  * Notebook designs — each maps to two purchasable size variants.
- * Lined: Legends Line, Tour Edition, Minutes to Midnight, Never Free Never Me,
- * and both Special Edition covers. All others are plain (unruled).
+ * Ruled: Legends Line, Tour Edition, Minutes to Midnight, Never Free Never Me,
+ * and both Special Edition covers. All others are unruled.
  * Special Edition is normal-size only (no A4).
  */
 export const NOTEBOOK_DESIGNS: readonly NotebookDesignConfig[] = [
@@ -72,7 +72,7 @@ export const NOTEBOOK_DESIGNS: readonly NotebookDesignConfig[] = [
     series: "Series 01",
     subtitle: "Album-art energy on every cover",
     description:
-      "Premium hardcovers inspired by the era when album art was sacred. Your space for lyrics, riffs, and real ideas. Interior: lined pages for structured writing.",
+      "Premium hardcovers inspired by the era when album art was sacred. Your space for lyrics, riffs, and real ideas. Interior: ruled pages for structured writing.",
     image: "/page1.png",
     normalSlug: "legends-line",
     a4Slug: "legends-line-a4",
@@ -85,7 +85,7 @@ export const NOTEBOOK_DESIGNS: readonly NotebookDesignConfig[] = [
     series: "Series 02",
     subtitle: "Lay-flat pages for creators",
     description:
-      "Built for dorms, studios, and late-night writing sessions — setlists, sketches, and setpiece notes. Interior: plain (unruled) pages for freeform work.",
+      "Built for dorms, studios, and late-night writing sessions — setlists, sketches, and setpiece notes. Interior: unruled pages for freeform work.",
     image: "/page2.png",
     normalSlug: "studio-sketch",
     a4Slug: "studio-sketch-a4",
@@ -98,7 +98,7 @@ export const NOTEBOOK_DESIGNS: readonly NotebookDesignConfig[] = [
     series: "Series 03",
     subtitle: "Road-ready durability",
     description:
-      "Durable build for ideas that don't wait for a desk. Every cover tells a story worth carrying forward. Interior: lined pages for notes on the road.",
+      "Durable build for ideas that don't wait for a desk. Every cover tells a story worth carrying forward. Interior: ruled pages for notes on the road.",
     image: "/page3.png",
     normalSlug: "tour-edition",
     a4Slug: "tour-edition-a4",
@@ -111,7 +111,7 @@ export const NOTEBOOK_DESIGNS: readonly NotebookDesignConfig[] = [
     series: "The Legends Line",
     subtitle: "Iconic cover, underground spirit",
     description:
-      "Raw cover art from the CultScribe Legends collection — written to last, made to be seen. Interior: plain pages.",
+      "Raw cover art from the CultScribe Legends collection — written to last, made to be seen. Interior: unruled pages.",
     image: "/cultscribe%205.jpg",
     normalSlug: "prince-of-darkness",
     a4Slug: "prince-of-darkness-a4",
@@ -123,7 +123,7 @@ export const NOTEBOOK_DESIGNS: readonly NotebookDesignConfig[] = [
     series: "Studio & Sketch",
     subtitle: "Cultural history on paper",
     description:
-      "A cover for creators who fill pages with rebellion, lyrics, and late-night ideas. Interior: plain pages.",
+      "A cover for creators who fill pages with rebellion, lyrics, and late-night ideas. Interior: unruled pages.",
     image: "/cultscribe%208.jpg",
     normalSlug: "gnr-was-here",
     a4Slug: "gnr-was-here-a4",
@@ -135,7 +135,7 @@ export const NOTEBOOK_DESIGNS: readonly NotebookDesignConfig[] = [
     series: "Tour Edition",
     subtitle: "Horizon-line cover art",
     description:
-      "Horizon-line artwork in a durable build — made for tours, studios, and everything in between. Interior: lined pages.",
+      "Horizon-line artwork in a durable build — made for tours, studios, and everything in between. Interior: ruled pages.",
     image: "/cultscribe%2022.jpg",
     normalSlug: "minutes-to-midnight",
     a4Slug: "minutes-to-midnight-a4",
@@ -147,7 +147,7 @@ export const NOTEBOOK_DESIGNS: readonly NotebookDesignConfig[] = [
     series: "Series 04",
     subtitle: "Late-night pages, loud ideas",
     description:
-      "Dark editorial cover for the hours when the best lines get written — unfinished thoughts welcome. Interior: plain pages.",
+      "Dark editorial cover for the hours when the best lines get written — unfinished thoughts welcome. Interior: unruled pages.",
     image: "/cultscribe%2011.jpg",
     normalSlug: "midnight-sessions",
     a4Slug: "midnight-sessions-a4",
@@ -159,7 +159,7 @@ export const NOTEBOOK_DESIGNS: readonly NotebookDesignConfig[] = [
     series: "New Drop",
     subtitle: "Raw. Real. Written.",
     description:
-      "High-contrast CultScribe cover — Never Free, Never Me — for essentials-only notebooks. Interior: lined pages for capturing thoughts line by line.",
+      "High-contrast CultScribe cover — Never Free, Never Me — for essentials-only notebooks. Interior: ruled pages for capturing thoughts line by line.",
     image: "/cultscribenew.jpeg",
     normalSlug: "never-free-never-me",
     a4Slug: "never-free-never-me-a4",
@@ -172,8 +172,8 @@ export const NOTEBOOK_DESIGNS: readonly NotebookDesignConfig[] = [
     series: "Special Edition",
     subtitle: "Special Edition · Metal Book Series",
     description:
-      "Special-edition cover — horns-up energy, Keep It Raw branding. Scarce run. Normal size only. Interior: lined pages.",
-    image: "/limited-edition-design-1.jpg",
+      "Special-edition cover — horns-up energy, Keep It Raw branding. Scarce run. Normal size only. Interior: ruled pages.",
+    image: "/special-book-keep-it-raw.jpg",
     normalSlug: "limited-keep-it-raw",
     a4Slug: "limited-keep-it-raw-a4",
     pageStyle: "lined",
@@ -186,8 +186,8 @@ export const NOTEBOOK_DESIGNS: readonly NotebookDesignConfig[] = [
     series: "Special Edition",
     subtitle: "Special Edition · Metal Book Series",
     description:
-      "Special-edition cover — dual-stage metal illustration from the CultScribe Metal Book Series. Scarce run. Normal size only. Interior: lined pages.",
-    image: "/limited-edition-2-close.jpg",
+      "Special-edition cover — dual-stage metal illustration from the CultScribe Metal Book Series. Scarce run. Normal size only. Interior: ruled pages.",
+    image: "/special-book-metal-stage.jpg",
     normalSlug: "limited-metal-stage",
     a4Slug: "limited-metal-stage-a4",
     pageStyle: "lined",
@@ -201,21 +201,21 @@ export const SPECIAL_EDITION_SHOWCASE = {
   products: [
     {
       designSlug: "limited-keep-it-raw",
-      image: "/limited-edition-design-1.jpg",
-      flatArt: "/limited-edition-1-close.jpg",
-      back: "/limited-edition-1-alt.jpg",
+      image: "/special-book-keep-it-raw.jpg",
+      flatArt: "/special-book-keep-it-raw.jpg",
+      back: "/special-book-keep-it-raw.jpg",
     },
     {
       designSlug: "limited-metal-stage",
-      image: "/limited-edition-2-close.jpg",
-      flatArt: "/limited-edition-2-alt.jpg",
-      back: "/limited-edition-2-detail.jpg",
+      image: "/special-book-metal-stage.jpg",
+      flatArt: "/special-book-metal-stage.jpg",
+      back: "/special-book-metal-stage.jpg",
     },
   ],
   designShots: [
     {
-      src: "/limited-edition-design-2.jpg",
-      alt: "CultScribe Special Edition Metal Book Series — both special covers",
+      src: "/special-book-keep-it-raw.jpg",
+      alt: "CultScribe Special Edition Keep It Raw cover",
     },
     {
       src: "/limited-edition-design-4.jpg",

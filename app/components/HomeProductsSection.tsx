@@ -8,7 +8,7 @@ import { motion, useReducedMotion } from "framer-motion";
 import { useEffect, useMemo, useState } from "react";
 import { useCart } from "@/components/CartProvider";
 import { PriceTag } from "@/app/components/PriceTag";
-import { NORMAL_COMPARE_AT } from "@/lib/pricing";
+import { NORMAL_COMPARE_AT, SPECIAL_EDITION_PRICE } from "@/lib/pricing";
 import type { ProductDTO } from "@/lib/types/commerce";
 import styles from "../page.module.css";
 
@@ -19,37 +19,38 @@ export const HOME_PRODUCTS = [
     slug: "legends-line",
     title: "The Legends line",
     description:
-      "Premium hardcovers with album-art energy. Lined pages for lyrics, riffs, and real ideas.",
+      "Premium hardcovers with album-art energy. Ruled pages for lyrics, riffs, and real ideas.",
     image: "/page1.png",
     fallbackPrice: 55,
-    pageStyle: "Lined pages",
+    pageStyle: "Ruled",
   },
   {
     slug: "studio-sketch",
     title: "Studio & sketch",
     description:
-      "Lay-flat plain pages for sketches, setlists, and setpiece notes — freeform creator space.",
+      "Lay-flat unruled pages for sketches, setlists, and setpiece notes — freeform creator space.",
     image: "/page2.png",
     fallbackPrice: 55,
-    pageStyle: "Plain pages",
+    pageStyle: "Unruled",
   },
   {
     slug: "tour-edition",
     title: "Tour edition",
     description:
-      "Road-ready durability with lined pages — because ideas don’t wait for a desk.",
+      "Road-ready durability with ruled pages — because ideas don’t wait for a desk.",
     image: "/page3.png",
     fallbackPrice: 55,
-    pageStyle: "Lined pages",
+    pageStyle: "Ruled",
   },
   {
-    slug: "never-free-never-me",
-    title: "Never Free, Never Me",
+    slug: "limited-keep-it-raw",
+    title: "Keep It Raw",
     description:
-      "New CultScribe drop — raw cover energy with lined pages for everyday writing.",
-    image: "/cultscribenew.jpeg",
-    fallbackPrice: 55,
-    pageStyle: "Lined pages",
+      "Special Edition — horns-up cover, scarce run, ruled pages. Normal size only.",
+    image: "/special-book-keep-it-raw.jpg",
+    fallbackPrice: SPECIAL_EDITION_PRICE,
+    pageStyle: "Ruled",
+    specialEdition: true,
   },
 ] as const;
 
@@ -153,8 +154,8 @@ export function HomeProductsSection({
             Featured notebooks
           </motion.h2>
           <motion.p className={styles.lead} variants={inViewChild}>
-            Featured covers from the CultScribe lineup — including lined and
-            plain interiors. Add to cart here, or open the full shop.
+            Featured covers from the CultScribe lineup — including ruled and
+            unruled interiors. Add to cart here, or open the full shop.
           </motion.p>
         </motion.div>
 
@@ -196,7 +197,11 @@ export function HomeProductsSection({
                 <p className={styles.cardTag}>
                   <PriceTag
                     price={item.price}
-                    compareAt={NORMAL_COMPARE_AT}
+                    compareAt={
+                      "specialEdition" in item && item.specialEdition
+                        ? null
+                        : NORMAL_COMPARE_AT
+                    }
                   />{" "}
                   · {item.pageStyle}
                 </p>

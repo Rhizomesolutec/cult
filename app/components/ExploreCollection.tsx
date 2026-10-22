@@ -39,10 +39,9 @@ export function ExploreCollection() {
           </p>
           <p className={styles.paperLead}>{NOTEBOOK_SPECS.paper} paper</p>
           <p className={styles.pageHint}>
-            Lined pages: Legends Line, Tour Edition, Minutes to Midnight, Never
-            Free Never Me, and Special Editions. All other covers use plain
-            (unruled) pages. Special Edition is normal size only — A4 is not
-            included.
+            Ruled: Legends Line, Tour Edition, Minutes to Midnight, Never
+            Free Never Me, and Special Editions. All other covers are unruled.
+            Special Edition is normal size only — A4 is not included.
           </p>
         </header>
 

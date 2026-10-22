@@ -2,10 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import {
-  SPECIAL_EDITION_DESIGNS,
-  SPECIAL_EDITION_SHOWCASE,
-} from "@/lib/config/notebook-designs";
+import { SPECIAL_EDITION_DESIGNS } from "@/lib/config/notebook-designs";
 import { SPECIAL_EDITION_PRICE } from "@/lib/pricing";
 import { formatINR } from "@/lib/commerce-client";
 import styles from "./LimitedEditionSection.module.css";
@@ -24,20 +21,13 @@ export function LimitedEditionSection() {
             Metal Book Series
           </h2>
           <p className={styles.lead}>
-            Scarce covers · lined · normal only ·{" "}
+            Scarce covers · ruled · normal only ·{" "}
             {formatINR(SPECIAL_EDITION_PRICE)} each
           </p>
         </header>
 
         <ul className={styles.grid}>
           {SPECIAL_EDITION_DESIGNS.map((design) => {
-            const showcase = SPECIAL_EDITION_SHOWCASE.products.find(
-              (p) => p.designSlug === design.designSlug,
-            );
-            const shots = showcase
-              ? [showcase.flatArt, showcase.back]
-              : [design.image];
-
             return (
               <li key={design.designSlug} className={styles.item}>
                 <Link
@@ -46,17 +36,15 @@ export function LimitedEditionSection() {
                   aria-label={`View ${design.name} special edition`}
                 >
                   <div className={styles.shots}>
-                    {shots.map((src) => (
-                      <div key={src} className={styles.shot}>
-                        <Image
-                          src={src}
-                          alt=""
-                          fill
-                          sizes="(max-width: 639px) 45vw, 280px"
-                          className={styles.shotImg}
-                        />
-                      </div>
-                    ))}
+                    <div className={styles.shot}>
+                      <Image
+                        src={design.image}
+                        alt=""
+                        fill
+                        sizes="(max-width: 639px) 90vw, 420px"
+                        className={styles.shotImg}
+                      />
+                    </div>
                     <span className={styles.badge}>Special</span>
                   </div>
                   <div className={styles.body}>

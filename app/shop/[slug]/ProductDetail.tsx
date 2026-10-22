@@ -146,7 +146,7 @@ export function ProductDetail({ design, initialSize }: ProductDetailProps) {
             <p className={styles.pageCallout}>
               This notebook has{" "}
               <strong>
-                {design.pageStyle === "lined" ? "lined pages" : "plain pages"}
+                {design.pageStyle === "lined" ? "ruled pages" : "unruled pages"}
               </strong>
               . {notebookSpecsLine(design, true)}.
             </p>
