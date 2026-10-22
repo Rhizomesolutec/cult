@@ -51,7 +51,16 @@ export function ProductDetail({ design, initialSize }: ProductDetailProps) {
     let cancelled = false;
     (async () => {
       try {
-        const res = await fetch("/api/products", { cache: "no-store" });
+        const slugs = [
+          design.normalSlug,
+          design.a4Slug,
+          offersBothPageStyles(design)
+            ? unruledProductSlug(design.normalSlug)
+            : "",
+        ].filter(Boolean);
+        const res = await fetch(
+          `/api/products?slugs=${encodeURIComponent(slugs.join(","))}`,
+        );
         if (!res.ok) return;
         const data = (await res.json()) as { products: ProductDTO[] };
         if (cancelled) return;
@@ -65,7 +74,7 @@ export function ProductDetail({ design, initialSize }: ProductDetailProps) {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [design]);
 
   const availableSizes: NotebookSize[] = design.specialEdition
     ? ["normal"]

@@ -86,12 +86,35 @@ function buildSeedProducts() {
 
 export const SEED_PRODUCTS = buildSeedProducts();
 
+/** Bump when catalog images, prices, or SKUs must be written to Mongo once. */
+const CATALOG_VERSION = "webp-v1";
+
+async function readCatalogVersion(): Promise<string | null> {
+  const doc = await Product.db.collection("catalogmeta").findOne({ key: "products" });
+  const version = doc?.version;
+  return typeof version === "string" ? version : null;
+}
+
+async function writeCatalogVersion() {
+  await Product.db.collection("catalogmeta").updateOne(
+    { key: "products" },
+    { $set: { version: CATALOG_VERSION, updatedAt: new Date() } },
+    { upsert: true },
+  );
+}
+
 export async function seedProductsIfEmpty() {
   await connectDB();
+
+  if ((await readCatalogVersion()) === CATALOG_VERSION) {
+    return { seeded: false, skipped: true };
+  }
+
   const count = await Product.countDocuments();
 
   if (count === 0) {
     await Product.insertMany([...SEED_PRODUCTS]);
+    await writeCatalogVersion();
     return { seeded: true, count: SEED_PRODUCTS.length };
   }
 
@@ -220,5 +243,6 @@ export async function seedProductsIfEmpty() {
     { $set: { active: false, stock: 0 } },
   );
 
+  await writeCatalogVersion();
   return { seeded: false, count: await Product.countDocuments() };
 }

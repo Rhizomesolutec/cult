@@ -16,12 +16,12 @@ const EASE_OUT = [0.22, 1, 0.36, 1] as const;
 const BG_WORDS = ["THINK", "WRITE", "CREATE", "REWRITE"] as const;
 
 const HERO_BOOKS = [
-  { src: "/page1.png", name: "The Legends Line", rotate: -4 },
-  { src: "/page2.png", name: "Studio & Sketch", rotate: -18 },
-  { src: "/page3.png", name: "Tour Edition", rotate: 13 },
-  { src: "/cultscribe%2022.jpg", name: "Minutes to Midnight", rotate: -28 },
+  { src: "/page1.webp", name: "The Legends Line", rotate: -4 },
+  { src: "/page2.webp", name: "Studio & Sketch", rotate: -18 },
+  { src: "/page3.webp", name: "Tour Edition", rotate: 13 },
+  { src: "/cultscribe-22.webp", name: "Minutes to Midnight", rotate: -28 },
   {
-    src: "/cultscribe%206.jpg.jpeg",
+    src: "/cultscribe-6.webp",
     name: "GNR Was Here",
     rotate: 22,
     objectPosition: "78% 32%",

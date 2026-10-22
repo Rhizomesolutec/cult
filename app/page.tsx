@@ -31,23 +31,23 @@ const EASE_OUT = [0.22, 1, 0.36, 1] as const;
 
 const IDENTITY_SLIDER_SLIDES: readonly PosterSliderSlide[] = [
   {
-    src: "/page4.jpeg",
+    src: "/page4.webp",
     alt: "Van Halen live on stage — Eddie Van Halen on the Frankenstrat with David Lee Roth, black and white concert photo.",
   },
   {
-    src: "/page5.jpeg",
+    src: "/page5.webp",
     alt: "Led Zeppelin with The Starship tour plane — band portrait on the airfield, black and white.",
   },
   {
-    src: "/page6.jpeg",
+    src: "/page6.webp",
     alt: "Bob Dylan in the studio with electric guitar, harmonica rack, and cigarette — black and white.",
   },
   {
-    src: "/page7.jpeg",
+    src: "/page7.webp",
     alt: "Willie Nelson on stage with Trigger and a spraying beer can — black and white.",
   },
   {
-    src: "/page8.jpeg",
+    src: "/page8.webp",
     alt: "AC/DC group portrait — Angus Young in schoolboy outfit with Gibson SG, Bon Scott and band, black and white.",
   },
 ];

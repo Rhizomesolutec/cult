@@ -84,7 +84,7 @@ export default function ShopPage() {
     let cancelled = false;
     (async () => {
       try {
-        const res = await fetch("/api/products", { cache: "no-store" });
+        const res = await fetch("/api/products");
         const data = await res.json();
         if (!res.ok) throw new Error(data.error || "Failed to load products");
         if (!cancelled) setProducts(data.products ?? []);

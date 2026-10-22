@@ -71,7 +71,7 @@ export function SiteHeader() {
       <Link className={styles.navLogo} href="/" aria-label="CultScribe home">
         <Image
           className={styles.navLogoImage}
-          src="/logo.png"
+          src="/logo.webp"
           alt="CultScribe — Raw. Real. Written."
           width={260}
           height={100}

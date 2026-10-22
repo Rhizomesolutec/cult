@@ -20,7 +20,7 @@ export const HOME_PRODUCTS = [
     title: "GNR",
     description:
       "Premium hardcovers with album-art energy. Unruled pages only.",
-    image: "/page1.png",
+    image: "/page1.webp",
     fallbackPrice: 55,
     pageStyle: "Unruled only",
   },
@@ -29,7 +29,7 @@ export const HOME_PRODUCTS = [
     title: "Pink Floyd",
     description:
       "Lay-flat unruled pages for sketches, setlists, and setpiece notes — freeform creator space.",
-    image: "/page2.png",
+    image: "/page2.webp",
     fallbackPrice: 55,
     pageStyle: "Unruled only",
   },
@@ -38,7 +38,7 @@ export const HOME_PRODUCTS = [
     title: "Ozzy",
     description:
       "Road-ready durability with unruled pages only.",
-    image: "/page3.png",
+    image: "/page3.webp",
     fallbackPrice: 55,
     pageStyle: "Unruled only",
   },
@@ -47,7 +47,7 @@ export const HOME_PRODUCTS = [
     title: "Eminem",
     description:
       "Special Edition — scarce run, normal size only. Choose ruled or unruled pages.",
-    image: "/special-book-keep-it-raw.jpg",
+    image: "/special-book-keep-it-raw.webp",
     fallbackPrice: SPECIAL_EDITION_PRICE,
     pageStyle: "Ruled & Unruled",
     specialEdition: true,
@@ -80,7 +80,7 @@ export function HomeProductsSection({
     let cancelled = false;
     (async () => {
       try {
-        const res = await fetch("/api/products", { cache: "no-store" });
+        const res = await fetch("/api/products");
         if (!res.ok) return;
         const data = (await res.json()) as { products: ProductDTO[] };
         if (cancelled) return;

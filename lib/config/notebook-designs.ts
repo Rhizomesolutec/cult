@@ -107,7 +107,7 @@ export const NOTEBOOK_DESIGNS: readonly NotebookDesignConfig[] = [
     subtitle: "Album-art energy on every cover",
     description:
       "Premium hardcovers inspired by the era when album art was sacred. Your space for lyrics, riffs, and real ideas. Interior: unruled pages only.",
-    image: "/page1.png",
+    image: "/page1.webp",
     normalSlug: "legends-line",
     a4Slug: "legends-line-a4",
     pageStyle: "plain",
@@ -120,7 +120,7 @@ export const NOTEBOOK_DESIGNS: readonly NotebookDesignConfig[] = [
     subtitle: "Lay-flat pages for creators",
     description:
       "Built for dorms, studios, and late-night writing sessions — setlists, sketches, and setpiece notes. Interior: unruled pages only.",
-    image: "/page2.png",
+    image: "/page2.webp",
     normalSlug: "studio-sketch",
     a4Slug: "studio-sketch-a4",
     pageStyle: "plain",
@@ -133,7 +133,7 @@ export const NOTEBOOK_DESIGNS: readonly NotebookDesignConfig[] = [
     subtitle: "Road-ready durability",
     description:
       "Durable build for ideas that don't wait for a desk. Every cover tells a story worth carrying forward. Interior: unruled pages only.",
-    image: "/page3.png",
+    image: "/page3.webp",
     normalSlug: "tour-edition",
     a4Slug: "tour-edition-a4",
     pageStyle: "plain",
@@ -146,7 +146,7 @@ export const NOTEBOOK_DESIGNS: readonly NotebookDesignConfig[] = [
     subtitle: "Horizon-line cover art",
     description:
       "Horizon-line artwork in a durable build — made for tours, studios, and everything in between. Interior: unruled pages only.",
-    image: "/minutes-to-midnight.jpg",
+    image: "/minutes-to-midnight.webp",
     normalSlug: "minutes-to-midnight",
     a4Slug: "minutes-to-midnight-a4",
     pageStyle: "plain",
@@ -158,7 +158,7 @@ export const NOTEBOOK_DESIGNS: readonly NotebookDesignConfig[] = [
     subtitle: "Raw. Real. Written.",
     description:
       "High-contrast CultScribe cover — Never Free, Never Me — for essentials-only notebooks. Interior: ruled pages only.",
-    image: "/cultscribenew.jpeg",
+    image: "/cultscribenew.webp",
     normalSlug: "never-free-never-me",
     a4Slug: "never-free-never-me-a4",
     pageStyle: "lined",
@@ -171,7 +171,7 @@ export const NOTEBOOK_DESIGNS: readonly NotebookDesignConfig[] = [
     subtitle: "Special Edition · Metal Book Series",
     description:
       "Special-edition cover. Scarce run. Normal size only. Available with ruled or unruled pages.",
-    image: "/special-book-keep-it-raw.jpg",
+    image: "/special-book-keep-it-raw.webp",
     normalSlug: "limited-keep-it-raw",
     a4Slug: "limited-keep-it-raw-a4",
     pageStyle: "lined",
@@ -186,7 +186,7 @@ export const NOTEBOOK_DESIGNS: readonly NotebookDesignConfig[] = [
     subtitle: "Special Edition · Metal Book Series",
     description:
       "Special-edition cover from the CultScribe Metal Book Series. Scarce run. Normal size only. Available with ruled or unruled pages.",
-    image: "/special-book-metal-stage.jpg",
+    image: "/special-book-metal-stage.webp",
     normalSlug: "limited-metal-stage",
     a4Slug: "limited-metal-stage-a4",
     pageStyle: "lined",
@@ -201,28 +201,28 @@ export const SPECIAL_EDITION_SHOWCASE = {
   products: [
     {
       designSlug: "limited-keep-it-raw",
-      image: "/special-book-keep-it-raw.jpg",
-      flatArt: "/special-book-keep-it-raw.jpg",
-      back: "/special-book-keep-it-raw.jpg",
+      image: "/special-book-keep-it-raw.webp",
+      flatArt: "/special-book-keep-it-raw.webp",
+      back: "/special-book-keep-it-raw.webp",
     },
     {
       designSlug: "limited-metal-stage",
-      image: "/special-book-metal-stage.jpg",
-      flatArt: "/special-book-metal-stage.jpg",
-      back: "/special-book-metal-stage.jpg",
+      image: "/special-book-metal-stage.webp",
+      flatArt: "/special-book-metal-stage.webp",
+      back: "/special-book-metal-stage.webp",
     },
   ],
   designShots: [
     {
-      src: "/special-book-keep-it-raw.jpg",
+      src: "/special-book-keep-it-raw.webp",
       alt: "CultScribe Special Edition Keep It Raw cover",
     },
     {
-      src: "/limited-edition-design-4.jpg",
+      src: "/limited-edition-design-4.webp",
       alt: "CultScribe Special Edition pair — Metal Stage and Keep It Raw side by side",
     },
     {
-      src: "/limited-edition-design-3.jpg",
+      src: "/limited-edition-design-3.webp",
       alt: "CultScribe Special Edition Metal Stage cover art",
     },
   ],
