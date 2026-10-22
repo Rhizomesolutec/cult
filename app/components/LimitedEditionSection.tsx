@@ -21,7 +21,7 @@ export function LimitedEditionSection() {
             Metal Book Series
           </h2>
           <p className={styles.lead}>
-            Scarce covers · ruled · normal only ·{" "}
+            Scarce covers · ruled & unruled · normal only ·{" "}
             {formatINR(SPECIAL_EDITION_PRICE)} each
           </p>
         </header>

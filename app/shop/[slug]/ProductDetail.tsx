@@ -11,9 +11,14 @@ import {
   PAPER_FEATURES,
   PAPER_INTRO,
   notebookSpecsLine,
+  offeredPageStyles,
+  offersBothPageStyles,
+  pageOfferLabel,
   pageStyleLabel,
   sizeLabel,
+  unruledProductSlug,
   type NotebookDesignConfig,
+  type NotebookPageStyle,
   type NotebookSize,
 } from "@/lib/config/notebook-designs";
 import { PriceTag } from "@/app/components/PriceTag";
@@ -35,6 +40,9 @@ export function ProductDetail({ design, initialSize }: ProductDetailProps) {
   const { addItem } = useCart();
   const [bySlug, setBySlug] = useState<Record<string, ProductDTO>>({});
   const [size, setSize] = useState<NotebookSize>(initialSize);
+  const [pageStyle, setPageStyle] = useState<NotebookPageStyle>(
+    offeredPageStyles(design)[0],
+  );
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState("");
   const [featuresOpen, setFeaturesOpen] = useState(true);
@@ -64,8 +72,14 @@ export function ProductDetail({ design, initialSize }: ProductDetailProps) {
     : ["normal", "a4"];
 
   const activeSize = availableSizes.includes(size) ? size : "normal";
-  const product =
-    bySlug[activeSize === "normal" ? design.normalSlug : design.a4Slug];
+  const bothStyles = offersBothPageStyles(design);
+  const productSlug =
+    activeSize === "a4"
+      ? design.a4Slug
+      : bothStyles && pageStyle === "plain"
+        ? unruledProductSlug(design.normalSlug)
+        : design.normalSlug;
+  const product = bySlug[productSlug];
 
   const fallbackPrice = design.specialEdition
     ? SPECIAL_EDITION_PRICE
@@ -146,7 +160,11 @@ export function ProductDetail({ design, initialSize }: ProductDetailProps) {
             <p className={styles.pageCallout}>
               This notebook has{" "}
               <strong>
-                {design.pageStyle === "lined" ? "ruled pages" : "unruled pages"}
+                {bothStyles
+                  ? "ruled and unruled pages"
+                  : design.pageStyle === "lined"
+                    ? "ruled pages only"
+                    : "unruled pages only"}
               </strong>
               . {notebookSpecsLine(design, true)}.
             </p>
@@ -208,6 +226,35 @@ export function ProductDetail({ design, initialSize }: ProductDetailProps) {
               <p className={styles.pageCallout}>
                 <strong>Normal size only</strong> — Special Edition does not
                 include A4.
+              </p>
+            )}
+
+            {bothStyles ? (
+              <div
+                className={styles.sizes}
+                role="group"
+                aria-label={`${design.name} pages`}
+              >
+                {offeredPageStyles(design).map((style) => (
+                  <button
+                    key={style}
+                    type="button"
+                    className={
+                      pageStyle === style ? styles.sizeActive : styles.sizeBtn
+                    }
+                    aria-pressed={pageStyle === style}
+                    onClick={() => {
+                      setPageStyle(style);
+                      setMessage("");
+                    }}
+                  >
+                    {pageStyleLabel(style)}
+                  </button>
+                ))}
+              </div>
+            ) : (
+              <p className={styles.pageCallout}>
+                <strong>{pageOfferLabel(design)}</strong>
               </p>
             )}
 

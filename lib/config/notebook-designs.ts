@@ -13,8 +13,10 @@ export type NotebookDesignConfig = {
   normalSlug: string;
   /** Slug for the A4 purchasable variant */
   a4Slug: string;
-  /** Interior ruling — lined or plain (unruled) pages */
+  /** Interior ruling — lined (ruled) or plain (unruled) pages */
   pageStyle: NotebookPageStyle;
+  /** When set, the notebook is sold in each of these interiors. */
+  pageStyles?: readonly NotebookPageStyle[];
   featured?: boolean;
   /** Special Edition — normal size only (no A4). */
   specialEdition?: boolean;
@@ -44,8 +46,37 @@ export function pageStyleLabel(style: NotebookPageStyle): string {
   return style === "lined" ? "Ruled" : "Unruled";
 }
 
+export function offeredPageStyles(design: {
+  pageStyle: NotebookPageStyle;
+  pageStyles?: readonly NotebookPageStyle[];
+}): NotebookPageStyle[] {
+  return design.pageStyles?.length ? [...design.pageStyles] : [design.pageStyle];
+}
+
+export function offersBothPageStyles(design: {
+  pageStyle: NotebookPageStyle;
+  pageStyles?: readonly NotebookPageStyle[];
+}): boolean {
+  const styles = offeredPageStyles(design);
+  return styles.includes("lined") && styles.includes("plain");
+}
+
+export function pageOfferLabel(design: {
+  pageStyle: NotebookPageStyle;
+  pageStyles?: readonly NotebookPageStyle[];
+}): string {
+  if (offersBothPageStyles(design)) return "Ruled & Unruled";
+  return `${pageStyleLabel(offeredPageStyles(design)[0])} only`;
+}
+
+export function unruledProductSlug(normalSlug: string): string {
+  return `${normalSlug}-unruled`;
+}
+
 export function notebookSpecsLine(
-  designOrCompact?: Pick<NotebookDesignConfig, "pageStyle"> | boolean,
+  designOrCompact?:
+    | Pick<NotebookDesignConfig, "pageStyle" | "pageStyles">
+    | boolean,
   compact = false,
 ): string {
   const design =
@@ -53,39 +84,42 @@ export function notebookSpecsLine(
   const isCompact =
     typeof designOrCompact === "boolean" ? designOrCompact : compact;
   const paper = isCompact ? NOTEBOOK_SPECS.paperShort : NOTEBOOK_SPECS.paper;
-  const pages = design
-    ? `${NOTEBOOK_SPECS.pages} ${design.pageStyle === "lined" ? "ruled" : "unruled"} pages`
-    : `${NOTEBOOK_SPECS.pages} pages`;
+  const pages = !design
+    ? `${NOTEBOOK_SPECS.pages} pages`
+    : offersBothPageStyles(design)
+      ? `${NOTEBOOK_SPECS.pages} ruled or unruled pages`
+      : `${NOTEBOOK_SPECS.pages} ${design.pageStyle === "lined" ? "ruled" : "unruled"} pages`;
   return `${pages} · ${NOTEBOOK_SPECS.gsm} GSM · ${paper}`;
 }
 
 /**
  * Notebook designs — each maps to two purchasable size variants.
- * Ruled: Legends Line, Tour Edition, Minutes to Midnight, Never Free Never Me,
- * and both Special Edition covers. All others are unruled.
+ * Ruled only: Never Free, Never Me.
+ * Unruled only: GNR, Pink Floyd, Ozzy, Linkin Park.
+ * Special Edition (Eminem, Black Sabbath): ruled and unruled.
  * Special Edition is normal-size only (no A4).
  */
 export const NOTEBOOK_DESIGNS: readonly NotebookDesignConfig[] = [
   {
     designSlug: "legends-line",
-    name: "The Legends Line",
+    name: "GNR",
     series: "Series 01",
     subtitle: "Album-art energy on every cover",
     description:
-      "Premium hardcovers inspired by the era when album art was sacred. Your space for lyrics, riffs, and real ideas. Interior: ruled pages for structured writing.",
+      "Premium hardcovers inspired by the era when album art was sacred. Your space for lyrics, riffs, and real ideas. Interior: unruled pages only.",
     image: "/page1.png",
     normalSlug: "legends-line",
     a4Slug: "legends-line-a4",
-    pageStyle: "lined",
+    pageStyle: "plain",
     featured: true,
   },
   {
     designSlug: "studio-sketch",
-    name: "Studio & Sketch",
+    name: "Pink Floyd",
     series: "Series 02",
     subtitle: "Lay-flat pages for creators",
     description:
-      "Built for dorms, studios, and late-night writing sessions — setlists, sketches, and setpiece notes. Interior: unruled pages for freeform work.",
+      "Built for dorms, studios, and late-night writing sessions — setlists, sketches, and setpiece notes. Interior: unruled pages only.",
     image: "/page2.png",
     normalSlug: "studio-sketch",
     a4Slug: "studio-sketch-a4",
@@ -94,63 +128,27 @@ export const NOTEBOOK_DESIGNS: readonly NotebookDesignConfig[] = [
   },
   {
     designSlug: "tour-edition",
-    name: "Tour Edition",
+    name: "Ozzy",
     series: "Series 03",
     subtitle: "Road-ready durability",
     description:
-      "Durable build for ideas that don't wait for a desk. Every cover tells a story worth carrying forward. Interior: ruled pages for notes on the road.",
+      "Durable build for ideas that don't wait for a desk. Every cover tells a story worth carrying forward. Interior: unruled pages only.",
     image: "/page3.png",
     normalSlug: "tour-edition",
     a4Slug: "tour-edition-a4",
-    pageStyle: "lined",
+    pageStyle: "plain",
     featured: true,
   },
   {
-    designSlug: "prince-of-darkness",
-    name: "Prince of Darkness",
-    series: "The Legends Line",
-    subtitle: "Iconic cover, underground spirit",
-    description:
-      "Raw cover art from the CultScribe Legends collection — written to last, made to be seen. Interior: unruled pages.",
-    image: "/cultscribe%205.jpg",
-    normalSlug: "prince-of-darkness",
-    a4Slug: "prince-of-darkness-a4",
-    pageStyle: "plain",
-  },
-  {
-    designSlug: "gnr-was-here",
-    name: "GNR Was Here",
-    series: "Studio & Sketch",
-    subtitle: "Cultural history on paper",
-    description:
-      "A cover for creators who fill pages with rebellion, lyrics, and late-night ideas. Interior: unruled pages.",
-    image: "/cultscribe%208.jpg",
-    normalSlug: "gnr-was-here",
-    a4Slug: "gnr-was-here-a4",
-    pageStyle: "plain",
-  },
-  {
     designSlug: "minutes-to-midnight",
-    name: "Minutes to Midnight",
+    name: "Linkin Park",
     series: "Tour Edition",
     subtitle: "Horizon-line cover art",
     description:
-      "Horizon-line artwork in a durable build — made for tours, studios, and everything in between. Interior: ruled pages.",
-    image: "/cultscribe%2022.jpg",
+      "Horizon-line artwork in a durable build — made for tours, studios, and everything in between. Interior: unruled pages only.",
+    image: "/minutes-to-midnight.jpg",
     normalSlug: "minutes-to-midnight",
     a4Slug: "minutes-to-midnight-a4",
-    pageStyle: "lined",
-  },
-  {
-    designSlug: "midnight-sessions",
-    name: "Midnight Sessions",
-    series: "Series 04",
-    subtitle: "Late-night pages, loud ideas",
-    description:
-      "Dark editorial cover for the hours when the best lines get written — unfinished thoughts welcome. Interior: unruled pages.",
-    image: "/cultscribe%2011.jpg",
-    normalSlug: "midnight-sessions",
-    a4Slug: "midnight-sessions-a4",
     pageStyle: "plain",
   },
   {
@@ -159,7 +157,7 @@ export const NOTEBOOK_DESIGNS: readonly NotebookDesignConfig[] = [
     series: "New Drop",
     subtitle: "Raw. Real. Written.",
     description:
-      "High-contrast CultScribe cover — Never Free, Never Me — for essentials-only notebooks. Interior: ruled pages for capturing thoughts line by line.",
+      "High-contrast CultScribe cover — Never Free, Never Me — for essentials-only notebooks. Interior: ruled pages only.",
     image: "/cultscribenew.jpeg",
     normalSlug: "never-free-never-me",
     a4Slug: "never-free-never-me-a4",
@@ -168,29 +166,31 @@ export const NOTEBOOK_DESIGNS: readonly NotebookDesignConfig[] = [
   },
   {
     designSlug: "limited-keep-it-raw",
-    name: "Keep It Raw",
+    name: "Eminem",
     series: "Special Edition",
     subtitle: "Special Edition · Metal Book Series",
     description:
-      "Special-edition cover — horns-up energy, Keep It Raw branding. Scarce run. Normal size only. Interior: ruled pages.",
+      "Special-edition cover. Scarce run. Normal size only. Available with ruled or unruled pages.",
     image: "/special-book-keep-it-raw.jpg",
     normalSlug: "limited-keep-it-raw",
     a4Slug: "limited-keep-it-raw-a4",
     pageStyle: "lined",
+    pageStyles: ["lined", "plain"],
     specialEdition: true,
     featured: true,
   },
   {
     designSlug: "limited-metal-stage",
-    name: "Metal Stage",
+    name: "Black Sabbath",
     series: "Special Edition",
     subtitle: "Special Edition · Metal Book Series",
     description:
-      "Special-edition cover — dual-stage metal illustration from the CultScribe Metal Book Series. Scarce run. Normal size only. Interior: ruled pages.",
+      "Special-edition cover from the CultScribe Metal Book Series. Scarce run. Normal size only. Available with ruled or unruled pages.",
     image: "/special-book-metal-stage.jpg",
     normalSlug: "limited-metal-stage",
     a4Slug: "limited-metal-stage-a4",
     pageStyle: "lined",
+    pageStyles: ["lined", "plain"],
     specialEdition: true,
     featured: true,
   },

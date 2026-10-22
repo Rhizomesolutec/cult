@@ -1,9 +1,12 @@
 "use client";
 
 import Link from "next/link";
-import { FormEvent, useEffect, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
+import { FormEvent, useState } from "react";
 import { SiteHeader } from "@/app/components/SiteHeader";
+import {
+  buildCheckoutWhatsAppMessage,
+  whatsAppUrl,
+} from "@/app/config/whatsapp";
 import { useCart } from "@/components/CartProvider";
 import { formatINR } from "@/lib/commerce-client";
 import styles from "./page.module.css";
@@ -213,8 +216,7 @@ function watchAtomCheckoutOpen(
 }
 
 export default function CheckoutPage() {
-  const router = useRouter();
-  const { cart, loading } = useCart();
+  const { cart, loading, refresh } = useCart();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
@@ -223,24 +225,12 @@ export default function CheckoutPage() {
   const [pincode, setPincode] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
-  const [localReturnWarning, setLocalReturnWarning] = useState(false);
-  const attemptRef = useRef(0);
-
-  useEffect(() => {
-    return () => {
-      // If the user navigates away mid-open, clear SDK overlays.
-      clearAtomSdkUi();
-    };
-  }, []);
 
   const onSubmit = async (e: FormEvent) => {
     e.preventDefault();
     if (busy) return;
     setError("");
-    setLocalReturnWarning(false);
-    clearAtomSdkUi();
     setBusy(true);
-    const attempt = ++attemptRef.current;
 
     try {
       const checkoutRes = await fetch("/api/checkout", {
@@ -260,94 +250,32 @@ export default function CheckoutPage() {
         throw new Error(checkoutData.error || "Checkout failed");
       }
 
-      const order = checkoutData.order as { id: string; orderNumber: string };
+      const order = checkoutData.order as { orderNumber: string };
+      const url = whatsAppUrl(
+        buildCheckoutWhatsAppMessage({
+          orderNumber: order.orderNumber,
+          name,
+          email,
+          phone,
+          address,
+          city,
+          pincode,
+          items: cart.items.map((item) => ({
+            name: item.name,
+            quantity: item.quantity,
+            lineTotal: item.lineTotal,
+          })),
+          subtotal: cart.subtotal,
+        }),
+      );
 
-      const payRes = await fetch("/api/payments/nttdata/initiate", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ orderId: order.id }),
-      });
-      const payData = await payRes.json();
-      console.info("[nttdata checkout] initiate", {
-        httpStatus: payRes.status,
-        fields:
-          payData && typeof payData === "object" ? Object.keys(payData) : [],
-        hasAtomTokenId: Boolean(payData?.atomTokenId),
-        atomTokenIdLen:
-          typeof payData?.atomTokenId === "string" ||
-          typeof payData?.atomTokenId === "number"
-            ? String(payData.atomTokenId).length
-            : 0,
-        returnUrlIsLocal: Boolean(payData?.returnUrlIsLocal),
-        attempt,
-      });
-      if (!payRes.ok) {
-        throw new Error(payData.error || "Payment initiation failed");
-      }
-
-      if (payData.alreadyPaid) {
-        router.push(`/order/${order.id}`);
-        return;
-      }
-
-      const returnUrlIsLocal = Boolean(payData.returnUrlIsLocal);
-      if (returnUrlIsLocal) {
-        setLocalReturnWarning(true);
-        console.info("[nttdata checkout] warning", {
-          code: "RETURN_URL_LOCALHOST",
-        });
-      }
-
-      await loadAtomCheckoutScript(String(payData.checkoutJsUrl));
-      if (!window.AtomPaynetz) {
-        throw new Error("NTT DATA checkout library did not load");
-      }
-
-      // Documented required options only (+ empty optionals to avoid bad asset URLs).
-      const options = {
-        atomTokenId: String(payData.atomTokenId),
-        merchId: String(payData.merchId),
-        custEmail: String(payData.custEmail),
-        custMobile: String(payData.custMobile),
-        returnUrl: String(payData.returnUrl),
-        merchantLogo: "",
-        bgColor: "",
-      };
-
-      console.info("[nttdata checkout] AtomPaynetz", {
-        optionKeys: Object.keys(options),
-        env: "uat",
-        atomTokenIdLen: options.atomTokenId.length,
-        merchIdLen: options.merchId.length,
-        custMobileLen: options.custMobile.length,
-        hasMerchantLogo: Boolean(options.merchantLogo),
-        returnUrlHost: (() => {
-          try {
-            return new URL(options.returnUrl).hostname;
-          } catch {
-            return "invalid";
-          }
-        })(),
-        returnUrlProtocol: (() => {
-          try {
-            return new URL(options.returnUrl).protocol;
-          } catch {
-            return "invalid";
-          }
-        })(),
-      });
-
-      new window.AtomPaynetz(options, "uat");
-
-      await watchAtomCheckoutOpen({ returnUrlIsLocal });
+      window.open(url, "_blank", "noopener,noreferrer");
+      await fetch("/api/cart", { method: "DELETE" });
+      await refresh();
     } catch (err) {
-      if (attempt === attemptRef.current) {
-        setError(err instanceof Error ? err.message : "Checkout failed");
-      }
+      setError(err instanceof Error ? err.message : "Checkout failed");
     } finally {
-      if (attempt === attemptRef.current) {
-        setBusy(false);
-      }
+      setBusy(false);
     }
   };
 
@@ -356,11 +284,10 @@ export default function CheckoutPage() {
       <SiteHeader />
       <main className={styles.page}>
         <span className={styles.eyebrow}>Checkout</span>
-        <h1 className={styles.title}>Payment details</h1>
+        <h1 className={styles.title}>Confirm your order</h1>
         <p className={styles.lead}>
-          Enter your delivery details, then pay securely via NTT DATA Payment
-          Services (UAT). Your card or UPI details are collected on the hosted
-          payment page.
+          Enter your delivery details. The confirm button opens WhatsApp with
+          your notebooks, quantities, and total so we can complete the order.
         </p>
 
         {loading ? <p className={styles.lead}>Loading…</p> : null}
@@ -399,15 +326,6 @@ export default function CheckoutPage() {
               <p className={styles.total}>Total · {formatINR(cart.subtotal)}</p>
             </div>
 
-            {localReturnWarning ? (
-              <p className={styles.error} role="status">
-                Return URL is localhost. NTT DATA UAT usually requires a public
-                HTTPS callback URL registered/whitelisted for your merchant.
-                Set <code>NEXT_PUBLIC_APP_URL</code> to that URL, restart the
-                app, and try again.
-              </p>
-            ) : null}
-
             {error ? <p className={styles.error}>{error}</p> : null}
 
             <form className={styles.form} onSubmit={(e) => void onSubmit(e)}>
@@ -437,7 +355,7 @@ export default function CheckoutPage() {
               />
 
               <label className={styles.label} htmlFor="phone">
-                Phone (for payment)
+                Phone
               </label>
               <input
                 id="phone"
@@ -491,16 +409,15 @@ export default function CheckoutPage() {
                   type="submit"
                   disabled={busy}
                 >
-                  {busy ? "Opening payment…" : "Pay now"}
+                  {busy ? "Opening WhatsApp…" : "Confirm on WhatsApp"}
                 </button>
                 <Link className={`${styles.btn} ${styles.btnGhost}`} href="/cart">
                   Back to cart
                 </Link>
               </div>
               <p className={styles.note}>
-                Tap Pay now to open the secure NTT DATA UAT payment page. If it
-                fails to open, fix the return URL config and try again — each
-                attempt requests a fresh payment token.
+                Confirm opens WhatsApp with this order. Online card payment is
+                paused for now.
               </p>
             </form>
           </div>

@@ -1,22 +1,30 @@
-.panel {
+.backdrop {
   position: fixed;
-  right: 1rem;
-  bottom: 1rem;
-  z-index: 60;
+  inset: 0;
+  z-index: 120;
   display: flex;
-  gap: 0.65rem;
-  width: min(20rem, calc(100vw - 2rem));
-  padding: 0.65rem;
+  align-items: flex-end;
+  justify-content: center;
+  padding: 1rem;
+  background: rgba(0, 0, 0, 0.55);
+}
+
+.dialog {
+  position: relative;
+  display: flex;
+  gap: 0.85rem;
+  width: min(28rem, 100%);
+  padding: 1rem;
   border: 1px solid rgba(232, 225, 215, 0.16);
-  background: rgba(12, 12, 12, 0.96);
-  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.45);
+  background: rgba(12, 12, 12, 0.98);
   color: var(--cult-cream-warm, #e8e1d7);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.5);
 }
 
 .media {
   position: relative;
-  flex: 0 0 3.75rem;
-  width: 3.75rem;
+  flex: 0 0 6.5rem;
+  width: 6.5rem;
   aspect-ratio: 3 / 4;
   overflow: hidden;
   background: #111;
@@ -29,43 +37,35 @@
 .body {
   flex: 1;
   min-width: 0;
+  padding-right: 1.25rem;
 }
 
 .eyebrow {
   margin: 0;
-  font-size: 0.6rem;
+  font-size: 0.65rem;
   font-weight: 700;
-  letter-spacing: 0.14em;
+  letter-spacing: 0.16em;
   text-transform: uppercase;
   color: var(--cult-red-accent, #e91e32);
 }
 
 .title {
-  margin: 0.15rem 0 0.1rem;
+  margin: 0.2rem 0 0.35rem;
   font-family: var(--cult-display);
-  font-size: 0.95rem;
+  font-size: 1.35rem;
   letter-spacing: 0.04em;
   text-transform: uppercase;
 }
 
 .copy {
-  margin: 0 0 0.5rem;
-  font-size: 0.72rem;
-  line-height: 1.35;
+  margin: 0 0 0.85rem;
+  font-size: 0.85rem;
+  line-height: 1.45;
   color: var(--cult-ash, #b8b2a8);
 }
 
-.actions {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 0.35rem;
-}
-
 .cta,
-.ghost,
-.close,
-.stuck {
+.close {
   font: inherit;
   cursor: pointer;
 }
@@ -73,94 +73,50 @@
 .cta {
   display: inline-flex;
   align-items: center;
-  padding: 0.3rem 0.55rem;
+  padding: 0.45rem 0.75rem;
   border: 1px solid var(--cult-red-accent, #e91e32);
   background: var(--cult-red-accent, #e91e32);
   color: #fff;
   text-decoration: none;
-  font-size: 0.65rem;
+  font-size: 0.72rem;
   font-weight: 700;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-}
-
-.ghost {
-  padding: 0.3rem 0.45rem;
-  border: 1px solid rgba(232, 225, 215, 0.25);
-  background: transparent;
-  color: var(--cult-cream-warm, #e8e1d7);
-  font-size: 0.65rem;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
 }
 
 .close {
-  margin-left: auto;
+  position: absolute;
+  top: 0.35rem;
+  right: 0.45rem;
   border: 0;
   background: transparent;
-  color: rgba(232, 225, 215, 0.7);
-  font-size: 1.05rem;
+  color: rgba(232, 225, 215, 0.75);
+  font-size: 1.25rem;
   line-height: 1;
-  padding: 0.1rem 0.2rem;
 }
 
-.stuck {
-  position: fixed;
-  right: 1rem;
-  bottom: 1rem;
-  z-index: 60;
-  padding: 0.55rem 0.75rem;
-  border: 1px solid rgba(232, 225, 215, 0.2);
-  background: rgba(12, 12, 12, 0.95);
-  color: var(--cult-cream-warm, #e8e1d7);
-  font-size: 0.65rem;
-  font-weight: 700;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.4);
+@media (min-width: 720px) {
+  .backdrop {
+    align-items: center;
+  }
 }
 
 @media (max-width: 480px) {
-  .panel {
-    right: 0.5rem;
-    bottom: 0.5rem;
-    width: min(16.5rem, calc(100vw - 1rem));
-    gap: 0.45rem;
-    padding: 0.45rem;
+  .dialog {
+    gap: 0.65rem;
+    padding: 0.75rem;
   }
 
   .media {
-    flex-basis: 2.75rem;
-    width: 2.75rem;
-  }
-
-  .eyebrow {
-    font-size: 0.55rem;
-    letter-spacing: 0.1em;
+    flex-basis: 4.5rem;
+    width: 4.5rem;
   }
 
   .title {
-    font-size: 0.8rem;
+    font-size: 1.05rem;
   }
 
   .copy {
-    display: none;
-  }
-
-  .cta,
-  .ghost {
-    padding: 0.25rem 0.4rem;
-    font-size: 0.58rem;
-  }
-
-  .close {
-    font-size: 0.95rem;
-  }
-
-  .stuck {
-    right: 0.5rem;
-    bottom: 0.5rem;
-    padding: 0.45rem 0.65rem;
-    font-size: 0.58rem;
+    font-size: 0.75rem;
   }
 }

@@ -170,8 +170,8 @@ export const SHOWCASE_GALLERY_ITEMS: readonly GalleryItem[] = [
  */
 export const COLLECTION_GALLERY_ITEMS: readonly GalleryItem[] = [
   {
-    common: "The Legends Line",
-    binomial: "Series 01 · Ruled",
+    common: "GNR",
+    binomial: "Series 01 · Unruled only",
     photo: {
       url: "/page1.png",
       text: "CultScribe The Legends Line notebook cover — ruled pages",
@@ -179,8 +179,8 @@ export const COLLECTION_GALLERY_ITEMS: readonly GalleryItem[] = [
     },
   },
   {
-    common: "Studio & Sketch",
-    binomial: "Series 02 · Unruled",
+    common: "Pink Floyd",
+    binomial: "Series 02 · Unruled only",
     photo: {
       url: "/page2.png",
       text: "CultScribe Studio & Sketch notebook cover — unruled pages",
@@ -188,8 +188,8 @@ export const COLLECTION_GALLERY_ITEMS: readonly GalleryItem[] = [
     },
   },
   {
-    common: "Tour Edition",
-    binomial: "Series 03 · Ruled",
+    common: "Ozzy",
+    binomial: "Series 03 · Unruled only",
     photo: {
       url: "/page3.png",
       text: "CultScribe Tour Edition notebook cover — ruled pages",
@@ -197,48 +197,18 @@ export const COLLECTION_GALLERY_ITEMS: readonly GalleryItem[] = [
     },
   },
   {
-    common: "Prince of Darkness",
-    binomial: "The Legends Line · Unruled",
+    common: "Linkin Park",
+    binomial: "Tour Edition · Unruled only",
     photo: {
-      url: "/cultscribe%205.jpg",
-      text: "CultScribe Prince of Darkness notebook — unruled pages",
-      pos: "50% 35%",
-      by: "CultScribe",
-    },
-  },
-  {
-    common: "GNR Was Here",
-    binomial: "Studio & Sketch · Unruled",
-    photo: {
-      url: "/cultscribe%208.jpg",
-      text: "CultScribe GNR Was Here notebook — unruled pages",
-      pos: "50% 40%",
-      by: "CultScribe",
-    },
-  },
-  {
-    common: "Minutes to Midnight",
-    binomial: "Tour Edition · Ruled",
-    photo: {
-      url: "/cultscribe%2022.jpg",
-      text: "CultScribe Minutes to Midnight notebook cover — ruled pages",
+      url: "/minutes-to-midnight.jpg",
+      text: "CultScribe Linkin Park Minutes to Midnight notebook — unruled pages",
       pos: "50% 30%",
       by: "CultScribe",
     },
   },
   {
-    common: "Midnight Sessions",
-    binomial: "Series 04 · Unruled",
-    photo: {
-      url: "/cultscribe%2011.jpg",
-      text: "CultScribe Midnight Sessions notebook — unruled pages",
-      pos: "55% 45%",
-      by: "CultScribe",
-    },
-  },
-  {
     common: "Never Free, Never Me",
-    binomial: "New Drop · Ruled",
+    binomial: "New Drop · Ruled only",
     photo: {
       url: "/cultscribenew.jpeg",
       text: "CultScribe Never Free, Never Me notebook — ruled pages",
@@ -247,8 +217,8 @@ export const COLLECTION_GALLERY_ITEMS: readonly GalleryItem[] = [
     },
   },
   {
-    common: "Keep It Raw",
-    binomial: "Special Edition · Ruled",
+    common: "Eminem",
+    binomial: "Special Edition · Ruled & Unruled",
     photo: {
       url: "/special-book-keep-it-raw.jpg",
       text: "CultScribe Keep It Raw special edition — ruled pages",
@@ -257,8 +227,8 @@ export const COLLECTION_GALLERY_ITEMS: readonly GalleryItem[] = [
     },
   },
   {
-    common: "Metal Stage",
-    binomial: "Special Edition · Ruled",
+    common: "Black Sabbath",
+    binomial: "Special Edition · Ruled & Unruled",
     photo: {
       url: "/special-book-metal-stage.jpg",
       text: "CultScribe Metal Stage special edition — ruled pages",

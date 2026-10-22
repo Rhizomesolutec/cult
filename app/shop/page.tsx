@@ -108,6 +108,7 @@ export default function ShopPage() {
     for (const p of products) {
       const isA4 = p.size === "a4" || p.slug.endsWith("-a4");
       // Special Edition is normal-only — hide any leftover A4 SKUs.
+      if (p.slug.endsWith("-unruled")) continue;
       if (p.specialEdition && isA4) continue;
       if (isA4) {
         a4.push(p);

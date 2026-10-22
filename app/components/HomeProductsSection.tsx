@@ -17,39 +17,39 @@ const EASE_OUT = [0.22, 1, 0.36, 1] as const;
 export const HOME_PRODUCTS = [
   {
     slug: "legends-line",
-    title: "The Legends line",
+    title: "GNR",
     description:
-      "Premium hardcovers with album-art energy. Ruled pages for lyrics, riffs, and real ideas.",
+      "Premium hardcovers with album-art energy. Unruled pages only.",
     image: "/page1.png",
     fallbackPrice: 55,
-    pageStyle: "Ruled",
+    pageStyle: "Unruled only",
   },
   {
     slug: "studio-sketch",
-    title: "Studio & sketch",
+    title: "Pink Floyd",
     description:
       "Lay-flat unruled pages for sketches, setlists, and setpiece notes — freeform creator space.",
     image: "/page2.png",
     fallbackPrice: 55,
-    pageStyle: "Unruled",
+    pageStyle: "Unruled only",
   },
   {
     slug: "tour-edition",
-    title: "Tour edition",
+    title: "Ozzy",
     description:
-      "Road-ready durability with ruled pages — because ideas don’t wait for a desk.",
+      "Road-ready durability with unruled pages only.",
     image: "/page3.png",
     fallbackPrice: 55,
-    pageStyle: "Ruled",
+    pageStyle: "Unruled only",
   },
   {
     slug: "limited-keep-it-raw",
-    title: "Keep It Raw",
+    title: "Eminem",
     description:
-      "Special Edition — horns-up cover, scarce run, ruled pages. Normal size only.",
+      "Special Edition — scarce run, normal size only. Choose ruled or unruled pages.",
     image: "/special-book-keep-it-raw.jpg",
     fallbackPrice: SPECIAL_EDITION_PRICE,
-    pageStyle: "Ruled",
+    pageStyle: "Ruled & Unruled",
     specialEdition: true,
   },
 ] as const;
@@ -214,7 +214,13 @@ export function HomeProductsSection({
                       Boolean(busySlug) ||
                       (Boolean(bySlug[item.slug]) && !item.inStock)
                     }
-                    onClick={() => void onAdd(item.slug)}
+                    onClick={() => {
+                      if ("specialEdition" in item && item.specialEdition) {
+                        router.push(`/shop/${item.slug}`);
+                        return;
+                      }
+                      void onAdd(item.slug);
+                    }}
                   >
                     {busySlug === item.slug ? (
                       "…"

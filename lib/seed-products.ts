@@ -2,6 +2,8 @@ import { connectDB } from "@/lib/db";
 import {
   NOTEBOOK_DESIGNS,
   notebookSpecsLine,
+  offersBothPageStyles,
+  unruledProductSlug,
 } from "@/lib/config/notebook-designs";
 import { Product } from "@/lib/models/Product";
 import {
@@ -30,7 +32,9 @@ function buildSeedProducts() {
     const price = priceForDesign(design.specialEdition);
     products.push({
       slug: design.normalSlug,
-      name: design.name,
+      name: offersBothPageStyles(design)
+        ? `${design.name} — Ruled`
+        : design.name,
       series: design.series,
       description: productDescription(design),
       price,
@@ -44,6 +48,23 @@ function buildSeedProducts() {
     });
 
     // Special Edition is normal-size only — keep A4 SKU inactive / zero stock.
+    if (offersBothPageStyles(design)) {
+      products.push({
+        slug: unruledProductSlug(design.normalSlug),
+        name: `${design.name} — Unruled`,
+        series: design.series,
+        description: `${productDescription(design)} Interior option: unruled pages.`,
+        price,
+        currency: "INR",
+        image: design.image,
+        stock: design.specialEdition ? 25 : 50,
+        featured: false,
+        active: true,
+        designSlug: design.designSlug,
+        size: "normal" as const,
+      });
+    }
+
     products.push({
       slug: design.a4Slug,
       name: `${design.name} — A4`,
@@ -111,6 +132,34 @@ export async function seedProductsIfEmpty() {
       { upsert: true },
     );
 
+    if (offersBothPageStyles(design)) {
+      await Product.updateOne(
+        { slug: unruledProductSlug(design.normalSlug) },
+        {
+          $set: {
+            image: design.image,
+            price,
+            designSlug: design.designSlug,
+            size: "normal",
+            name: `${design.name} — Unruled`,
+            series: design.series,
+            description: `${productDescription(design)} Interior option: unruled pages.`,
+            featured: false,
+            active: true,
+          },
+          $setOnInsert: {
+            stock: design.specialEdition ? 25 : 50,
+            currency: "INR",
+          },
+        },
+        { upsert: true },
+      );
+      await Product.updateOne(
+        { slug: design.normalSlug },
+        { $set: { name: `${design.name} — Ruled` } },
+      );
+    }
+
     await Product.updateOne(
       { slug: design.a4Slug },
       {
@@ -153,6 +202,22 @@ export async function seedProductsIfEmpty() {
   await Product.updateMany(
     { series: { $ne: SPECIAL_EDITION_SERIES }, size: "a4" },
     { $set: { price: NORMAL_PRICE, stock: 0 } },
+  );
+
+  await Product.updateMany(
+    {
+      slug: {
+        $in: [
+          "prince-of-darkness",
+          "prince-of-darkness-a4",
+          "gnr-was-here",
+          "gnr-was-here-a4",
+          "midnight-sessions",
+          "midnight-sessions-a4",
+        ],
+      },
+    },
+    { $set: { active: false, stock: 0 } },
   );
 
   return { seeded: false, count: await Product.countDocuments() };

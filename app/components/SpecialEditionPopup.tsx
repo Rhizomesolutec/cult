@@ -8,95 +8,76 @@ import { SPECIAL_EDITION_PRICE } from "@/lib/pricing";
 import { formatINR } from "@/lib/commerce-client";
 import styles from "./SpecialEditionPopup.module.css";
 
-const STORAGE_KEY = "cultscribe_special_edition_promo";
 const POPUP_IMAGE = SPECIAL_EDITION_SHOWCASE.designShots[0];
 
-type PromoMode = "open" | "stuck" | "hidden";
-
 export function SpecialEditionPopup() {
-  const [mode, setMode] = useState<PromoMode>("hidden");
-  const [ready, setReady] = useState(false);
+  const [open, setOpen] = useState(false);
 
   useEffect(() => {
-    try {
-      const saved = window.localStorage.getItem(STORAGE_KEY) as PromoMode | null;
-      if (saved === "stuck" || saved === "hidden") {
-        setMode(saved);
-      } else {
-        setMode("open");
-      }
-    } catch {
-      setMode("open");
-    }
-    setReady(true);
+    let shown = false;
+    const reveal = () => {
+      if (shown) return;
+      const hero = document.querySelector("[aria-label='Hero']");
+      const heroBottom = hero?.getBoundingClientRect().bottom;
+      const scrolledPastHero =
+        heroBottom != null
+          ? heroBottom < window.innerHeight * 0.85
+          : window.scrollY > window.innerHeight * 0.35;
+      if (!scrolledPastHero && window.scrollY < 180) return;
+      shown = true;
+      setOpen(true);
+      window.removeEventListener("scroll", reveal);
+    };
+
+    reveal();
+    window.addEventListener("scroll", reveal, { passive: true });
+    return () => window.removeEventListener("scroll", reveal);
   }, []);
 
-  const persist = (next: PromoMode) => {
-    setMode(next);
-    try {
-      window.localStorage.setItem(STORAGE_KEY, next);
-    } catch {
-      /* ignore */
-    }
+  const close = () => {
+    setOpen(false);
   };
 
-  if (!ready || mode === "hidden" || !POPUP_IMAGE) return null;
-
-  if (mode === "stuck") {
-    return (
-      <button
-        type="button"
-        className={styles.stuck}
-        onClick={() => persist("open")}
-        aria-label="Open Special Edition offer"
-      >
-        Special Edition
-      </button>
-    );
-  }
+  if (!open || !POPUP_IMAGE) return null;
 
   return (
-    <aside className={styles.panel} role="dialog" aria-label="Special Edition">
-      <div className={styles.media}>
-        <Image
-          src={POPUP_IMAGE.src}
-          alt={POPUP_IMAGE.alt}
-          fill
-          sizes="(max-width: 480px) 44px, 60px"
-          className={styles.img}
-        />
-      </div>
-      <div className={styles.body}>
-        <p className={styles.eyebrow}>Special Edition</p>
-        <p className={styles.title}>Metal Book Series</p>
-        <p className={styles.copy}>
-          Normal only · {formatINR(SPECIAL_EDITION_PRICE)}
-        </p>
-        <div className={styles.actions}>
-          <Link
-            href="/#special-edition"
-            className={styles.cta}
-            onClick={() => persist("stuck")}
-          >
+    <div className={styles.backdrop} role="presentation" onClick={close}>
+      <aside
+        className={styles.dialog}
+        role="dialog"
+        aria-modal="true"
+        aria-label="Special Edition"
+        onClick={(event) => event.stopPropagation()}
+      >
+        <button
+          type="button"
+          className={styles.close}
+          aria-label="Close Special Edition introduction"
+          onClick={close}
+        >
+          ×
+        </button>
+        <div className={styles.media}>
+          <Image
+            src={POPUP_IMAGE.src}
+            alt={POPUP_IMAGE.alt}
+            fill
+            sizes="160px"
+            className={styles.img}
+          />
+        </div>
+        <div className={styles.body}>
+          <p className={styles.eyebrow}>Introducing</p>
+          <p className={styles.title}>Special Edition</p>
+          <p className={styles.copy}>
+            Eminem and Black Sabbath — scarce covers, normal size only, ruled
+            or unruled pages, {formatINR(SPECIAL_EDITION_PRICE)} each.
+          </p>
+          <Link href="/#special-edition" className={styles.cta} onClick={close}>
             View covers
           </Link>
-          <button
-            type="button"
-            className={styles.ghost}
-            onClick={() => persist("stuck")}
-          >
-            Stick
-          </button>
-          <button
-            type="button"
-            className={styles.close}
-            aria-label="Dismiss Special Edition promo"
-            onClick={() => persist("hidden")}
-          >
-            ×
-          </button>
         </div>
-      </div>
-    </aside>
+      </aside>
+    </div>
   );
 }

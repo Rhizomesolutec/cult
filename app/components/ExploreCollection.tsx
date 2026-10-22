@@ -7,7 +7,7 @@ import {
   NOTEBOOK_DESIGNS,
   NOTEBOOK_SPECS,
   notebookSpecsLine,
-  pageStyleLabel,
+  pageOfferLabel,
 } from "@/lib/config/notebook-designs";
 import {
   COMBO_PACK_PRICE,
@@ -39,9 +39,9 @@ export function ExploreCollection() {
           </p>
           <p className={styles.paperLead}>{NOTEBOOK_SPECS.paper} paper</p>
           <p className={styles.pageHint}>
-            Ruled: Legends Line, Tour Edition, Minutes to Midnight, Never
-            Free Never Me, and Special Editions. All other covers are unruled.
-            Special Edition is normal size only — A4 is not included.
+            Ruled only: Never Free, Never Me. Unruled only: GNR, Pink Floyd,
+            Ozzy, and Linkin Park. Special Edition (Eminem and Black Sabbath)
+            is ruled and unruled, normal size only.
           </p>
         </header>
 
@@ -89,7 +89,7 @@ export function ExploreCollection() {
                     {notebookSpecsLine(design, true)}
                   </p>
                   <p className={styles.pageStyle}>
-                    {pageStyleLabel(design.pageStyle)}
+                    {pageOfferLabel(design)}
                     {design.specialEdition ? " · Normal only" : ""}
                   </p>
                   <span className={styles.price}>
