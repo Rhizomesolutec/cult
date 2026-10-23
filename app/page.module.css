@@ -378,12 +378,6 @@
   gap: 0.85rem;
 }
 
-@media (max-width: 719px) {
-  .cards {
-    grid-template-columns: 1fr;
-  }
-}
-
 @media (min-width: 720px) {
   .cards {
     gap: 1.85rem;
@@ -676,13 +670,21 @@
     gap: 0.75rem;
   }
 
+  .card:last-child:nth-child(odd) {
+    grid-column: 1 / -1;
+    width: calc(50% - 0.375rem);
+    justify-self: center;
+  }
+
   .card {
     min-height: 0;
+    max-height: none;
+    aspect-ratio: 3 / 4;
   }
 
   .cardContent {
-    min-height: 17.5rem;
-    padding: 1rem 0.85rem 0.9rem;
+    min-height: 0;
+    padding: 1rem 0.7rem 0.75rem;
   }
 
   .cardNum {
@@ -701,28 +703,36 @@
   }
 
   .cardTag {
-    margin-top: 0.55rem;
-    font-size: 0.8125rem;
+    margin-top: 0.45rem;
+    font-size: 0.75rem;
     letter-spacing: 0.02em;
   }
 
   .productActions {
     display: grid;
-    grid-template-columns: 1fr;
-    gap: 0.4rem;
-    margin-top: 0.7rem;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.35rem;
+    margin-top: 0.55rem;
     width: 100%;
+  }
+
+  .btnLabelFull {
+    display: none;
+  }
+
+  .btnLabelShort {
+    display: inline;
   }
 
   .productAddBtn,
   .productShopLink {
     width: 100%;
-    min-height: 2.5rem;
-    padding: 0.55rem 0.45rem;
-    font-size: 0.6875rem;
-    letter-spacing: 0.04em;
+    min-height: 2.125rem;
+    padding: 0.45rem 0.3rem;
+    font-size: 0.5625rem;
+    letter-spacing: 0.08em;
     border-radius: 2px;
-    white-space: normal;
+    white-space: nowrap;
   }
 
   .productShopLink {
@@ -750,29 +760,5 @@
   .footer {
     padding: 1.5rem 1rem calc(1.5rem + env(safe-area-inset-bottom, 0px));
     font-size: var(--text-xs);
-  }
-}
-
-@media (max-width: 719px) {
-  .cardTitle {
-    font-size: clamp(1.7rem, 8vw, 2.25rem);
-  }
-
-  .cardDesc {
-    display: -webkit-box;
-    -webkit-line-clamp: 3;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-    max-width: none;
-    font-size: 0.875rem;
-  }
-
-  .productActions {
-    grid-template-columns: 1fr 1fr;
-  }
-
-  .productAddBtn,
-  .productShopLink {
-    font-size: 0.75rem;
   }
 }

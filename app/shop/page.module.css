@@ -344,10 +344,16 @@
   }
 
   .grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.65rem;
+  }
+
+  .desc {
+    -webkit-line-clamp: 2;
   }
 
   .name {
+    font-size: 0.85rem;
     overflow-wrap: anywhere;
   }
 
