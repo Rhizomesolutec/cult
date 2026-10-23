@@ -1,7 +1,7 @@
+import { catalogDescription } from "@/lib/catalog";
 import { connectDB } from "@/lib/db";
 import {
   NOTEBOOK_DESIGNS,
-  notebookSpecsLine,
   offersBothPageStyles,
   unruledProductSlug,
 } from "@/lib/config/notebook-designs";
@@ -20,9 +20,7 @@ function productDescription(
   design: (typeof NOTEBOOK_DESIGNS)[number],
   a4 = false,
 ): string {
-  const base = `${design.description} ${notebookSpecsLine(design)}.`;
-  if (!a4) return base;
-  return `${base} Available in A4 format for larger spreads and heavier writing sessions.`;
+  return catalogDescription(design, a4);
 }
 
 function buildSeedProducts() {

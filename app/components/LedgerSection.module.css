@@ -348,8 +348,11 @@
   }
 
   .toggleBtn {
-    padding: 0.75rem 0.65rem;
+    padding: 0.7rem 0.5rem;
     font-size: 0.625rem;
+    letter-spacing: 0.04em;
+    line-height: 1.25;
+    white-space: normal;
   }
 
   .scrubLabels {

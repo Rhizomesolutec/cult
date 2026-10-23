@@ -1,10 +1,23 @@
 import { NextResponse } from "next/server";
 import { connectDB } from "@/lib/db";
-import { getCartDTO } from "@/lib/cart-service";
+import { assembleCart, getCartDTO } from "@/lib/cart-service";
 import { getOrCreateCartSessionId } from "@/lib/commerce";
 import { Cart } from "@/lib/models/Cart";
 import { Product } from "@/lib/models/Product";
 import mongoose from "mongoose";
+
+function isMongoId(value: string) {
+  return mongoose.Types.ObjectId.isValid(value) && /^[a-f0-9]{24}$/i.test(value);
+}
+
+async function findActiveProduct(productId?: string, slug?: string) {
+  if (productId && isMongoId(productId)) {
+    return Product.findOne({ _id: productId, active: true });
+  }
+  const key = slug?.trim() || productId?.trim();
+  if (!key) return null;
+  return Product.findOne({ slug: key, active: true });
+}
 
 export async function GET() {
   try {
@@ -21,21 +34,17 @@ export async function POST(req: Request) {
   try {
     const body = (await req.json()) as {
       productId?: string;
+      slug?: string;
       quantity?: number;
     };
 
-    const productId = body.productId?.trim();
     const quantity = Math.max(1, Math.floor(body.quantity ?? 1));
-
-    if (!productId || !mongoose.Types.ObjectId.isValid(productId)) {
+    if (!body.productId?.trim() && !body.slug?.trim()) {
       return NextResponse.json({ error: "Invalid product" }, { status: 400 });
     }
 
     await connectDB();
-    const product = await Product.findOne({
-      _id: new mongoose.Types.ObjectId(productId),
-      active: true,
-    });
+    const product = await findActiveProduct(body.productId, body.slug);
     if (!product) {
       return NextResponse.json({ error: "Product not found" }, { status: 404 });
     }
@@ -50,7 +59,7 @@ export async function POST(req: Request) {
     }
 
     const existing = cart.items.find(
-      (i) => String(i.productId) === String(product._id),
+      (item) => String(item.productId) === String(product._id),
     );
     const nextQty = Math.min(
       product.stock,
@@ -64,8 +73,13 @@ export async function POST(req: Request) {
     }
 
     await cart.save();
-    const dto = await getCartDTO(sessionId);
-    return NextResponse.json({ cart: dto });
+    const products = await Product.find({
+      _id: { $in: cart.items.map((item) => item.productId) },
+      active: true,
+    }).lean();
+    return NextResponse.json({
+      cart: assembleCart(cart.items, products),
+    });
   } catch (error) {
     console.error("[POST /api/cart]", error);
     return NextResponse.json({ error: "Failed to update cart" }, { status: 500 });
@@ -82,11 +96,17 @@ export async function PATCH(req: Request) {
     const productId = body.productId?.trim();
     const quantity = Math.floor(body.quantity ?? 0);
 
-    if (!productId || !mongoose.Types.ObjectId.isValid(productId)) {
+    if (!productId) {
       return NextResponse.json({ error: "Invalid product" }, { status: 400 });
     }
 
     await connectDB();
+    const product = await findActiveProduct(productId);
+    const lineId = product ? String(product._id) : productId;
+    if (!product && !isMongoId(productId)) {
+      return NextResponse.json({ error: "Product not found" }, { status: 404 });
+    }
+
     const sessionId = await getOrCreateCartSessionId();
     const cart = await Cart.findOne({ sessionId });
     if (!cart) {
@@ -94,13 +114,12 @@ export async function PATCH(req: Request) {
     }
 
     if (quantity <= 0) {
-      cart.items = cart.items.filter((i) => String(i.productId) !== productId);
+      cart.items = cart.items.filter((item) => String(item.productId) !== lineId);
     } else {
-      const product = await Product.findById(productId);
       if (!product) {
         return NextResponse.json({ error: "Product not found" }, { status: 404 });
       }
-      const line = cart.items.find((i) => String(i.productId) === productId);
+      const line = cart.items.find((item) => String(item.productId) === lineId);
       if (!line) {
         return NextResponse.json({ error: "Item not in cart" }, { status: 404 });
       }
@@ -108,8 +127,11 @@ export async function PATCH(req: Request) {
     }
 
     await cart.save();
-    const dto = await getCartDTO(sessionId);
-    return NextResponse.json({ cart: dto });
+    const products = await Product.find({
+      _id: { $in: cart.items.map((item) => item.productId) },
+      active: true,
+    }).lean();
+    return NextResponse.json({ cart: assembleCart(cart.items, products) });
   } catch (error) {
     console.error("[PATCH /api/cart]", error);
     return NextResponse.json({ error: "Failed to update cart" }, { status: 500 });
@@ -126,20 +148,34 @@ export async function DELETE(req: Request) {
     const cart = await Cart.findOne({ sessionId });
     if (!cart) {
       return NextResponse.json({
-        cart: { items: [], itemCount: 0, subtotal: 0, currency: "INR" },
+        cart: {
+          items: [],
+          itemCount: 0,
+          subtotal: 0,
+          deliveryCharge: 0,
+          total: 0,
+          currency: "INR",
+        },
       });
     }
 
     if (productId) {
-      cart.items = cart.items.filter((i) => String(i.productId) !== productId);
+      const product = isMongoId(productId)
+        ? null
+        : await Product.findOne({ slug: productId, active: true }).select("_id");
+      const lineId = product ? String(product._id) : productId;
+      cart.items = cart.items.filter((item) => String(item.productId) !== lineId);
       await cart.save();
     } else {
       cart.items = [];
       await cart.save();
     }
 
-    const dto = await getCartDTO(sessionId);
-    return NextResponse.json({ cart: dto });
+    const products = await Product.find({
+      _id: { $in: cart.items.map((item) => item.productId) },
+      active: true,
+    }).lean();
+    return NextResponse.json({ cart: assembleCart(cart.items, products) });
   } catch (error) {
     console.error("[DELETE /api/cart]", error);
     return NextResponse.json({ error: "Failed to clear cart" }, { status: 500 });

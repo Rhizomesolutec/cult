@@ -41,6 +41,8 @@ export type OrderAttrs = {
   };
   items: OrderItemAttrs[];
   subtotal: number;
+  /** Shipping: ₹50 per 4 books. Missing on orders created before this rule. */
+  deliveryCharge?: number;
   currency: string;
   /** Payment lifecycle */
   status: "pending_payment" | "paid" | "failed" | "cancelled";
@@ -133,6 +135,7 @@ const OrderSchema = new Schema<OrderAttrs>(
     },
     items: { type: [OrderItemSchema], required: true },
     subtotal: { type: Number, required: true, min: 0 },
+    deliveryCharge: { type: Number, min: 0, default: 0 },
     currency: { type: String, default: "INR" },
     status: {
       type: String,

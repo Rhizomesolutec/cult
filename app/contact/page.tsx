@@ -30,13 +30,10 @@ export default function ContactPage() {
 
   const child = useMemo(
     () => ({
-      hidden: reduceMotion
-        ? { opacity: 0 }
-        : { opacity: 0, y: 20, filter: "blur(8px)" },
+      hidden: reduceMotion ? { opacity: 0 } : { opacity: 0, y: 20 },
       show: {
         opacity: 1,
         y: 0,
-        filter: "blur(0px)",
         transition: {
           duration: reduceMotion ? 0.01 : 0.62,
           ease: easeOut,

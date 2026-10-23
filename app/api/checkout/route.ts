@@ -92,12 +92,14 @@ export async function POST(req: Request) {
 
     if (existing && orderFingerprint(existing) === fingerprint) {
       existing.customer = { name, email, phone, address, city, pincode };
+      existing.deliveryCharge = cart.deliveryCharge;
       await existing.save();
       return NextResponse.json({
         order: {
           id: String(existing._id),
           orderNumber: existing.orderNumber,
           subtotal: existing.subtotal,
+          deliveryCharge: existing.deliveryCharge,
           currency: existing.currency,
           status: existing.status,
           reused: true,
@@ -117,6 +119,7 @@ export async function POST(req: Request) {
         quantity: i.quantity,
       })),
       subtotal: cart.subtotal,
+      deliveryCharge: cart.deliveryCharge,
       currency: cart.currency,
       status: "pending_payment",
       fulfillmentStatus: "awaiting_payment",
@@ -146,6 +149,7 @@ export async function POST(req: Request) {
         id: String(order._id),
         orderNumber: order.orderNumber,
         subtotal: order.subtotal,
+        deliveryCharge: order.deliveryCharge,
         currency: order.currency,
         status: order.status,
       },

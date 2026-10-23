@@ -2,38 +2,50 @@ import { connectDB } from "@/lib/db";
 import { Cart } from "@/lib/models/Cart";
 import { Product } from "@/lib/models/Product";
 import {
+  deliveryChargeForBooks,
   isSpecialEditionSeries,
+  orderTotal,
   priceCartLines,
   productDisplayPrice,
 } from "@/lib/pricing";
 import type { CartDTO, CartItemDTO } from "@/lib/types/commerce";
 
-export async function getCartDTO(sessionId: string): Promise<CartDTO> {
-  await connectDB();
-  const cart = await Cart.findOne({ sessionId }).lean();
-  if (!cart?.items?.length) {
-    return {
-      items: [],
-      itemCount: 0,
-      subtotal: 0,
-      currency: "INR",
-      comboApplied: false,
-      comboSavings: 0,
-      comboEligibleCount: 0,
-      comboMessage: "",
-    };
-  }
+type CartLine = {
+  productId: { toString(): string };
+  quantity: number;
+};
 
-  const ids = cart.items.map((i) => i.productId);
-  const products = await Product.find({
-    _id: { $in: ids },
-    active: true,
-  }).lean();
+type CartProduct = {
+  _id: { toString(): string };
+  name: string;
+  series: string;
+  image: string;
+  price: number;
+  currency?: string;
+  stock: number;
+  size?: "normal" | "a4";
+};
 
-  const byId = new Map(products.map((p) => [String(p._id), p]));
+const emptyCart = (): CartDTO => ({
+  items: [],
+  itemCount: 0,
+  subtotal: 0,
+  currency: "INR",
+  comboApplied: false,
+  comboSavings: 0,
+  comboEligibleCount: 0,
+  comboMessage: "",
+  deliveryCharge: 0,
+  total: 0,
+});
+
+export function assembleCart(lines: CartLine[], products: CartProduct[]): CartDTO {
+  if (!lines.length || !products.length) return emptyCart();
+
+  const byId = new Map(products.map((product) => [String(product._id), product]));
   const items: CartItemDTO[] = [];
 
-  for (const line of cart.items) {
+  for (const line of lines) {
     const product = byId.get(String(line.productId));
     if (!product) continue;
     const quantity = Math.min(line.quantity, Math.max(product.stock, 0));
@@ -43,7 +55,6 @@ export async function getCartDTO(sessionId: string): Promise<CartDTO> {
       specialEdition,
       series: product.series,
     });
-    // Prefer DB price, but keep display helpers aligned with catalog rules.
     const unitPrice = product.price;
     items.push({
       productId: String(product._id),
@@ -62,16 +73,16 @@ export async function getCartDTO(sessionId: string): Promise<CartDTO> {
   }
 
   const priced = priceCartLines(
-    items.map((i) => ({
-      quantity: i.quantity,
-      unitPrice: i.price,
-      size: i.size,
-      series: i.series,
-      specialEdition: i.specialEdition,
+    items.map((item) => ({
+      quantity: item.quantity,
+      unitPrice: item.price,
+      size: item.size,
+      series: item.series,
+      specialEdition: item.specialEdition,
     })),
   );
-
-  const itemCount = items.reduce((sum, i) => sum + i.quantity, 0);
+  const itemCount = items.reduce((sum, item) => sum + item.quantity, 0);
+  const deliveryCharge = deliveryChargeForBooks(itemCount);
 
   return {
     items,
@@ -82,5 +93,20 @@ export async function getCartDTO(sessionId: string): Promise<CartDTO> {
     comboSavings: priced.comboSavings,
     comboEligibleCount: priced.eligibleCount,
     comboMessage: priced.comboMessage,
+    deliveryCharge,
+    total: orderTotal(priced.subtotal, deliveryCharge),
   };
+}
+
+export async function getCartDTO(sessionId: string): Promise<CartDTO> {
+  await connectDB();
+  const cart = await Cart.findOne({ sessionId }).lean();
+  if (!cart?.items?.length) return emptyCart();
+
+  const products = await Product.find({
+    _id: { $in: cart.items.map((item) => item.productId) },
+    active: true,
+  }).lean();
+
+  return assembleCart(cart.items, products);
 }

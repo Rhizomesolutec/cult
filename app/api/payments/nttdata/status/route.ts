@@ -10,6 +10,7 @@ import {
 } from "@/lib/payments/nttdata/client";
 import { getNttDataConfig } from "@/lib/payments/nttdata/config";
 import { applyVerifiedPaymentResult } from "@/lib/payments/nttdata/fulfill";
+import { payableAmount } from "@/lib/pricing";
 
 export async function POST(req: Request) {
   try {
@@ -82,7 +83,7 @@ export async function POST(req: Request) {
     const config = getNttDataConfig();
     const instrument = await requeryTransactionStatus({
       merchTxnId,
-      amount: order.subtotal,
+      amount: payableAmount(order),
       atomTxnId,
       merchTxnDate,
     });
@@ -93,7 +94,7 @@ export async function POST(req: Request) {
     let signatureValid = false;
     if (callbackSig) {
       signatureValid =
-        verifyStatusResponseSignature(instrument, order.subtotal) ||
+        verifyStatusResponseSignature(instrument, payableAmount(order)) ||
         verifyPaymentResponseSignature(instrument);
     }
 

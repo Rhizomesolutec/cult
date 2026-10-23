@@ -17,6 +17,7 @@ export type CheckoutWhatsAppPayload = {
   pincode: string;
   items: { name: string; quantity: number; lineTotal: number }[];
   subtotal: number;
+  deliveryCharge: number;
 };
 
 /** Pre-filled order message opened in WhatsApp after checkout. */
@@ -39,7 +40,9 @@ export function buildCheckoutWhatsAppMessage(payload: CheckoutWhatsAppPayload) {
         `• ${item.name} × ${item.quantity} — ${format(item.lineTotal)}`,
     ),
     "",
-    `Total: ${format(payload.subtotal)}`,
+    `Books: ${format(payload.subtotal)}`,
+    `Delivery: ${format(payload.deliveryCharge)}`,
+    `Total: ${format(payload.subtotal + payload.deliveryCharge)}`,
     "",
     "Delivery details:",
     `Name: ${payload.name}`,

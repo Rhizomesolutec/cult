@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { SiteHeader } from "@/app/components/SiteHeader";
 import { useCart } from "@/components/CartProvider";
+import { staticCatalog } from "@/lib/catalog";
 import {
   NOTEBOOK_SPECS,
   notebookSpecsLine,
@@ -28,7 +29,7 @@ function ProductCard({
 }: {
   product: ProductDTO;
   busyId: string | null;
-  onAdd: (productId: string) => void;
+  onAdd: () => void;
 }) {
   return (
     <article className={styles.card}>
@@ -60,10 +61,10 @@ function ProductCard({
         <button
           type="button"
           className={styles.btn}
-          disabled={product.stock < 1 || busyId === product.id}
-          onClick={() => onAdd(product.id)}
+          disabled={product.stock < 1 || busyId === product.slug}
+          onClick={onAdd}
         >
-          {busyId === product.id ? "Adding…" : "Add to cart"}
+          {busyId === product.slug ? "Adding…" : "Add to cart"}
         </button>
       </div>
     </article>
@@ -73,12 +74,13 @@ function ProductCard({
 export default function ShopPage() {
   const router = useRouter();
   const { addItem } = useCart();
-  const [products, setProducts] = useState<ProductDTO[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+  const [products, setProducts] = useState<ProductDTO[]>(() => staticCatalog());
   const [busyId, setBusyId] = useState<string | null>(null);
-  const [message, setMessage] = useState("");
   const [filter, setFilter] = useState<ShopFilter>("normal");
+
+  useEffect(() => {
+    router.prefetch("/cart");
+  }, [router]);
 
   useEffect(() => {
     let cancelled = false;
@@ -86,14 +88,10 @@ export default function ShopPage() {
       try {
         const res = await fetch("/api/products");
         const data = await res.json();
-        if (!res.ok) throw new Error(data.error || "Failed to load products");
-        if (!cancelled) setProducts(data.products ?? []);
-      } catch (e) {
-        if (!cancelled) {
-          setError(e instanceof Error ? e.message : "Failed to load products");
-        }
-      } finally {
-        if (!cancelled) setLoading(false);
+        if (!res.ok || cancelled) return;
+        setProducts(data.products ?? []);
+      } catch {
+        /* static catalog stays on screen */
       }
     })();
     return () => {
@@ -151,16 +149,26 @@ export default function ShopPage() {
     },
   };
 
-  const onAdd = async (productId: string) => {
-    setBusyId(productId);
-    setMessage("");
-    try {
-      await addItem(productId, 1);
-      router.push("/cart");
-    } catch (e) {
-      setMessage(e instanceof Error ? e.message : "Could not add to cart");
-      setBusyId(null);
-    }
+  const onAdd = (product: ProductDTO) => {
+    if (busyId) return;
+    setBusyId(product.slug);
+    const mongoId = /^[a-f0-9]{24}$/i.test(product.id) ? product.id : undefined;
+    void addItem({
+      productId: mongoId,
+      slug: product.slug,
+      snapshot: {
+        name: product.name,
+        series: product.series,
+        image: product.image,
+        price: product.price,
+        compareAtPrice: product.compareAtPrice,
+        currency: product.currency,
+        stock: product.stock,
+        size: product.size,
+        specialEdition: product.specialEdition,
+      },
+    });
+    router.push("/cart");
   };
 
   return (
@@ -211,15 +219,11 @@ export default function ShopPage() {
           ))}
         </div>
 
-        {loading ? <p className={styles.status}>Loading products…</p> : null}
-        {error ? <p className={styles.error}>{error}</p> : null}
-        {message ? <p className={styles.status}>{message}</p> : null}
-
-        {!loading && !error && products.length === 0 ? (
+        {products.length === 0 ? (
           <p className={styles.empty}>No products yet.</p>
         ) : null}
 
-        {!loading && !error && products.length > 0 ? (
+        {products.length > 0 ? (
           <section
             className={styles.sizeSection}
             aria-labelledby="shop-filter-title"
@@ -236,10 +240,10 @@ export default function ShopPage() {
               <div className={styles.grid}>
                 {filtered.map((p) => (
                   <ProductCard
-                    key={p.id}
+                    key={p.slug}
                     product={p}
                     busyId={busyId}
-                    onAdd={(id) => void onAdd(id)}
+                    onAdd={() => onAdd(p)}
                   />
                 ))}
               </div>

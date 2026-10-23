@@ -141,11 +141,10 @@ export function HeroNotebook({ notebookImage }: HeroNotebookProps) {
                   variants={{
                     hidden: reduceMotion
                       ? { opacity: 0 }
-                      : { opacity: 0, y: 28, filter: "blur(10px)" },
+                      : { opacity: 0, y: 28 },
                     show: {
                       opacity: 1,
                       y: 0,
-                      filter: "blur(0px)",
                       transition: { duration: 0.7, ease: EASE_OUT },
                     },
                   }}
@@ -224,14 +223,12 @@ export function HeroNotebook({ notebookImage }: HeroNotebookProps) {
                             opacity: 0,
                             y: "-110vh",
                             rotate: book.rotate - 8,
-                            filter: "blur(12px)",
                           }
                     }
                     animate={{
                       opacity: 1,
                       y: 0,
                       rotate: book.rotate,
-                      filter: "blur(0px)",
                     }}
                     transition={
                       reduceMotion
@@ -240,7 +237,6 @@ export function HeroNotebook({ notebookImage }: HeroNotebookProps) {
                             duration: 1.2,
                             delay: 0.18 + i * 0.12,
                             ease: DROP_EASE,
-                            filter: { duration: 0.9 },
                           }
                     }
                   >

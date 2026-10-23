@@ -48,6 +48,10 @@ export type CartDTO = {
   comboSavings?: number;
   comboEligibleCount?: number;
   comboMessage?: string;
+  /** Shipping added on top of the book subtotal. */
+  deliveryCharge: number;
+  /** Books plus delivery. */
+  total: number;
 };
 
 export function toProductDTO(p: {

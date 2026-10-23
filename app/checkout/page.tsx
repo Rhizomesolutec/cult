@@ -266,6 +266,7 @@ export default function CheckoutPage() {
             lineTotal: item.lineTotal,
           })),
           subtotal: cart.subtotal,
+          deliveryCharge: cart.deliveryCharge,
         }),
       );
 
@@ -323,7 +324,13 @@ export default function CheckoutPage() {
                   Combo savings · −{formatINR(cart.comboSavings)}
                 </p>
               ) : null}
-              <p className={styles.total}>Total · {formatINR(cart.subtotal)}</p>
+              <p className={styles.total}>
+                Books · {formatINR(cart.subtotal)}
+              </p>
+              <p className={styles.total}>
+                Delivery · {formatINR(cart.deliveryCharge)}
+              </p>
+              <p className={styles.total}>Total · {formatINR(cart.total)}</p>
             </div>
 
             {error ? <p className={styles.error}>{error}</p> : null}

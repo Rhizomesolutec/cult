@@ -9,6 +9,9 @@ export const SPECIAL_EDITION_PRICE = 65;
 /** Four normal books together. */
 export const COMBO_PACK_SIZE = 4;
 export const COMBO_PACK_PRICE = 200;
+/** Delivery is ₹50 for every 4 books (1–4 → ₹50, 5–8 → ₹100, 9–12 → ₹150). */
+export const DELIVERY_PACK_SIZE = 4;
+export const DELIVERY_PACK_CHARGE = 50;
 
 export const SPECIAL_EDITION_SERIES = "Special Edition";
 
@@ -45,6 +48,45 @@ export function comboSavings(eligibleCount: number): number {
   const n = Math.max(0, Math.floor(eligibleCount));
   if (n < COMBO_PACK_SIZE) return 0;
   return n * NORMAL_PRICE - comboEligibleTotal(n);
+}
+
+/** ₹50 for books 1–4, then ₹50 more after every further 4 books. */
+export function deliveryChargeForBooks(bookCount: number): number {
+  const count = Math.max(0, Math.floor(bookCount));
+  if (count <= 0) return 0;
+  return Math.ceil(count / DELIVERY_PACK_SIZE) * DELIVERY_PACK_CHARGE;
+}
+
+export function orderTotal(subtotal: number, deliveryCharge: number): number {
+  return Math.max(0, subtotal) + Math.max(0, deliveryCharge);
+}
+
+/** Saved charge when present; otherwise the current per-4-books rule. */
+export function chargeForOrder(order: {
+  subtotal: number;
+  deliveryCharge?: number | null;
+  items: { quantity: number }[];
+}): { deliveryCharge: number; total: number } {
+  const books = order.items.reduce(
+    (sum, item) => sum + Math.max(0, Math.floor(item.quantity)),
+    0,
+  );
+  const stored = order.deliveryCharge;
+  const deliveryCharge =
+    typeof stored === "number" && stored > 0
+      ? stored
+      : deliveryChargeForBooks(books);
+  return { deliveryCharge, total: orderTotal(order.subtotal, deliveryCharge) };
+}
+
+/** Amount a payment gateway should charge. Missing delivery stays off old orders. */
+export function payableAmount(order: {
+  subtotal: number;
+  deliveryCharge?: number | null;
+}): number {
+  const delivery =
+    typeof order.deliveryCharge === "number" ? order.deliveryCharge : 0;
+  return orderTotal(order.subtotal, delivery);
 }
 
 export type CartPricingLine = {

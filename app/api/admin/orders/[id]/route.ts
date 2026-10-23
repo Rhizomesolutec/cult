@@ -6,6 +6,7 @@ import {
   notifyOrderShipped,
 } from "@/lib/email/order-notifications";
 import { Order } from "@/lib/models/Order";
+import { chargeForOrder } from "@/lib/pricing";
 import mongoose from "mongoose";
 
 type Params = { params: Promise<{ id: string }> };
@@ -61,6 +62,7 @@ export async function PATCH(req: Request, { params }: Params) {
       await order.save();
     }
 
+    const money = chargeForOrder(order);
     return NextResponse.json({
       order: {
         id: String(order._id),
@@ -72,6 +74,8 @@ export async function PATCH(req: Request, { params }: Params) {
         emailLog: order.emailLog,
         payment: order.payment,
         subtotal: order.subtotal,
+        deliveryCharge: money.deliveryCharge,
+        total: money.total,
         items: order.items,
       },
     });

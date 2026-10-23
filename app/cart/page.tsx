@@ -8,7 +8,7 @@ import { formatINR } from "@/lib/commerce-client";
 import styles from "./page.module.css";
 
 export default function CartPage() {
-  const { cart, loading, setQuantity, removeItem } = useCart();
+  const { cart, loading, notice, setQuantity, removeItem } = useCart();
 
   return (
     <>
@@ -17,7 +17,10 @@ export default function CartPage() {
         <span className={styles.eyebrow}>Cart</span>
         <h1 className={styles.title}>Your bag</h1>
 
-        {loading ? <p className={styles.empty}>Loading cart…</p> : null}
+        {loading && cart.items.length === 0 ? (
+          <p className={styles.empty}>Loading cart…</p>
+        ) : null}
+        {notice ? <p className={styles.empty}>{notice}</p> : null}
 
         {!loading && cart.items.length === 0 ? (
           <p className={styles.empty}>
@@ -89,9 +92,15 @@ export default function CartPage() {
                 Combo savings · −{formatINR(cart.comboSavings)}
               </p>
             ) : null}
-            <p className={styles.subtotal}>
-              Subtotal · {formatINR(cart.subtotal)}
-            </p>
+              <p className={styles.subtotal}>
+                Books · {formatINR(cart.subtotal)}
+              </p>
+              <p className={styles.subtotal}>
+                Delivery · {formatINR(cart.deliveryCharge)}
+              </p>
+              <p className={styles.subtotal}>
+                Total · {formatINR(cart.total)}
+              </p>
             <Link className={styles.btn} href="/checkout">
               Checkout
             </Link>

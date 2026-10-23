@@ -22,13 +22,10 @@ export function LedgerSection() {
   };
 
   const headerChild = {
-    hidden: reduceMotion
-      ? { opacity: 0 }
-      : { opacity: 0, y: 22, filter: "blur(8px)" },
+    hidden: reduceMotion ? { opacity: 0 } : { opacity: 0, y: 22 },
     show: {
       opacity: 1,
       y: 0,
-      filter: "blur(0px)",
       transition: { duration: reduceMotion ? 0.01 : 0.65, ease: easeOut },
     },
   };
@@ -40,23 +37,19 @@ export function LedgerSection() {
 
   const panelAnimate = reduceMotion
     ? { opacity: 1 }
-    : { opacity: 1, x: 0, filter: "blur(0px)", scale: 1 };
+    : { opacity: 1, x: 0, scale: 1 };
 
   const problemInitial = reduceMotion
     ? { opacity: 0 }
-    : { opacity: 0, x: -18, filter: "blur(10px)", scale: 0.985 };
+    : { opacity: 0, x: -18, scale: 0.985 };
   const solutionInitial = reduceMotion
     ? { opacity: 0 }
-    : { opacity: 0, x: 18, filter: "blur(10px)", scale: 0.985 };
+    : { opacity: 0, x: 18, scale: 0.985 };
 
-  /** Problem panel exits right / blurs when switching to solution */
-  const exitProblem = reduceMotion
-    ? { opacity: 0 }
-    : { opacity: 0, x: 20, filter: "blur(10px)" };
-  /** Solution panel exits left / blurs when switching to problem */
-  const exitSolution = reduceMotion
-    ? { opacity: 0 }
-    : { opacity: 0, x: -20, filter: "blur(10px)" };
+  /** Problem panel exits right when switching to solution */
+  const exitProblem = reduceMotion ? { opacity: 0 } : { opacity: 0, x: 20 };
+  /** Solution panel exits left when switching to problem */
+  const exitSolution = reduceMotion ? { opacity: 0 } : { opacity: 0, x: -20 };
 
   return (
     <section id="ledger" className={styles.ledger} aria-labelledby="ledger-title">

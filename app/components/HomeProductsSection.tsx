@@ -7,6 +7,7 @@ import type { Variants } from "framer-motion";
 import { motion, useReducedMotion } from "framer-motion";
 import { useEffect, useMemo, useState } from "react";
 import { useCart } from "@/components/CartProvider";
+import { catalogProduct } from "@/lib/catalog";
 import { PriceTag } from "@/app/components/PriceTag";
 import { NORMAL_COMPARE_AT, SPECIAL_EDITION_PRICE } from "@/lib/pricing";
 import type { ProductDTO } from "@/lib/types/commerce";
@@ -77,6 +78,10 @@ export function HomeProductsSection({
   const [message, setMessage] = useState("");
 
   useEffect(() => {
+    router.prefetch("/cart");
+  }, [router]);
+
+  useEffect(() => {
     let cancelled = false;
     (async () => {
       try {
@@ -96,21 +101,32 @@ export function HomeProductsSection({
     };
   }, []);
 
-  const onAdd = async (slug: string) => {
-    const product = bySlug[slug];
-    if (!product) {
-      setMessage("Product not ready yet — open Shop to browse.");
+  const onAdd = (slug: string) => {
+    const live = bySlug[slug];
+    const source = live ?? catalogProduct(slug);
+    if (!source || (live && live.stock < 1)) {
+      setMessage(live && live.stock < 1 ? "That notebook is sold out." : "");
       return;
     }
     setBusySlug(slug);
     setMessage("");
-    try {
-      await addItem(product.id, 1);
-      router.push("/cart");
-    } catch (e) {
-      setMessage(e instanceof Error ? e.message : "Could not add to cart");
-      setBusySlug(null);
-    }
+    const mongoId = /^[a-f0-9]{24}$/i.test(source.id) ? source.id : undefined;
+    void addItem({
+      productId: mongoId,
+      slug,
+      snapshot: {
+        name: source.name,
+        series: source.series,
+        image: source.image,
+        price: source.price,
+        compareAtPrice: source.compareAtPrice,
+        currency: source.currency,
+        stock: source.stock,
+        size: source.size,
+        specialEdition: source.specialEdition,
+      },
+    });
+    router.push("/cart");
   };
 
   const items = useMemo(

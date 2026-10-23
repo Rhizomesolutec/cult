@@ -71,13 +71,10 @@ export default function Home() {
 
   const inViewChild = useMemo(
     () => ({
-      hidden: reduceMotion
-        ? { opacity: 0 }
-        : { opacity: 0, y: 26, filter: "blur(8px)" },
+      hidden: reduceMotion ? { opacity: 0 } : { opacity: 0, y: 26 },
       show: {
         opacity: 1,
         y: 0,
-        filter: "blur(0px)",
         transition: {
           duration: reduceMotion ? 0.01 : 0.68,
           ease: EASE_OUT,
@@ -257,14 +254,8 @@ export default function Home() {
         <motion.footer
           className={styles.footer}
           role="contentinfo"
-          initial={
-            reduceMotion ? { opacity: 0 } : { opacity: 0, y: 12, filter: "blur(6px)" }
-          }
-          whileInView={
-            reduceMotion
-              ? { opacity: 1 }
-              : { opacity: 1, y: 0, filter: "blur(0px)" }
-          }
+          initial={reduceMotion ? { opacity: 0 } : { opacity: 0, y: 12 }}
+          whileInView={reduceMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
           viewport={{ once: true, amount: 0.35 }}
           transition={{ duration: reduceMotion ? 0.01 : 0.55, ease: EASE_OUT }}
         >

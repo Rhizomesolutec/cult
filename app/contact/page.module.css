@@ -174,3 +174,26 @@
 .back:hover {
   color: var(--cult-cream);
 }
+
+@media (max-width: 767px) {
+  .page {
+    padding: 5.5rem 0.85rem calc(4.5rem + env(safe-area-inset-bottom, 0px));
+  }
+
+  .title {
+    font-size: clamp(2rem, 10vw, 2.75rem);
+  }
+
+  .lead {
+    font-size: var(--text-sm);
+  }
+
+  .block {
+    padding: 1.15rem 0.9rem 1.35rem;
+  }
+
+  .input,
+  .textarea {
+    font-size: 1rem;
+  }
+}

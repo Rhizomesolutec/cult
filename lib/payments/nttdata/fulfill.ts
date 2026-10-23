@@ -4,6 +4,7 @@ import { Order, type OrderDocument } from "@/lib/models/Order";
 import { Product } from "@/lib/models/Product";
 import type { AtomPaymentInstrument } from "./types";
 import { formatNttAmount } from "./config";
+import { payableAmount } from "@/lib/pricing";
 import {
   isFailedPaymentStatus,
   isPendingPaymentStatus,
@@ -81,7 +82,7 @@ export async function applyVerifiedPaymentResult(input: {
 
   const gatewayAmount =
     totalAmount ?? instrument.payDetails?.amount ?? null;
-  if (gatewayAmount != null && !amountsMatch(order.subtotal, gatewayAmount)) {
+  if (gatewayAmount != null && !amountsMatch(payableAmount(order), gatewayAmount)) {
     throw new Error("Paid amount does not match order total");
   }
 

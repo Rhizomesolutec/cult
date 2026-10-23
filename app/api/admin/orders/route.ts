@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { requireAdmin } from "@/lib/admin-auth";
 import { connectDB } from "@/lib/db";
 import { Order } from "@/lib/models/Order";
+import { chargeForOrder } from "@/lib/pricing";
 
 function serializeOrder(o: {
   _id: unknown;
@@ -9,6 +10,7 @@ function serializeOrder(o: {
   status: string;
   fulfillmentStatus?: string;
   subtotal: number;
+  deliveryCharge?: number | null;
   currency: string;
   customer: unknown;
   items: {
@@ -23,12 +25,15 @@ function serializeOrder(o: {
   createdAt?: Date;
   updatedAt?: Date;
 }) {
+  const money = chargeForOrder(o);
   return {
     id: String(o._id),
     orderNumber: o.orderNumber,
     status: o.status,
     fulfillmentStatus: o.fulfillmentStatus || "awaiting_payment",
     subtotal: o.subtotal,
+    deliveryCharge: money.deliveryCharge,
+    total: money.total,
     currency: o.currency,
     customer: o.customer,
     items: o.items.map((i) => ({

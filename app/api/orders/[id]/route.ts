@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { connectDB } from "@/lib/db";
 import { getCartSessionId } from "@/lib/commerce";
 import { Order } from "@/lib/models/Order";
+import { chargeForOrder } from "@/lib/pricing";
 
 type Params = { params: Promise<{ id: string }> };
 
@@ -20,6 +21,8 @@ export async function GET(_req: Request, { params }: Params) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
     }
 
+    const money = chargeForOrder(order);
+
     return NextResponse.json({
       order: {
         id: String(order._id),
@@ -27,6 +30,8 @@ export async function GET(_req: Request, { params }: Params) {
         status: order.status,
         fulfillmentStatus: order.fulfillmentStatus || "awaiting_payment",
         subtotal: order.subtotal,
+        deliveryCharge: money.deliveryCharge,
+        total: money.total,
         currency: order.currency,
         customer: order.customer,
         items: order.items.map((i) => ({

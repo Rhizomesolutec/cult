@@ -11,6 +11,7 @@ import {
 } from "@/lib/payments/nttdata/client";
 import { getNttDataConfig } from "@/lib/payments/nttdata/config";
 import { applyVerifiedPaymentResult } from "@/lib/payments/nttdata/fulfill";
+import { payableAmount } from "@/lib/pricing";
 
 export const runtime = "nodejs";
 
@@ -88,14 +89,14 @@ async function handleCallback(req: Request) {
           new Date().toISOString().slice(0, 10);
         const requery = await requeryTransactionStatus({
           merchTxnId: order.payment.merchTxnId,
-          amount: order.subtotal,
+          amount: payableAmount(order),
           atomTxnId,
           merchTxnDate,
         });
         working = requery;
         const requerySig = String(requery.payDetails?.signature ?? "");
         signatureValid = requerySig
-          ? verifyStatusResponseSignature(requery, order.subtotal) ||
+          ? verifyStatusResponseSignature(requery, payableAmount(order)) ||
             verifyPaymentResponseSignature(requery)
           : false;
       } catch (error) {

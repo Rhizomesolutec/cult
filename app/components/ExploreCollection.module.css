@@ -190,6 +190,7 @@
   text-transform: uppercase;
   color: var(--cult-cream-warm, #e8e1d7);
   line-height: 1.15;
+  overflow-wrap: anywhere;
 }
 
 .series {
@@ -254,6 +255,16 @@
 
   .price {
     font-size: var(--text-base);
+  }
+}
+
+@media (max-width: 479px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+
+  .name {
+    font-size: clamp(1.15rem, 5vw, 1.4rem);
   }
 }
 

@@ -1,5 +1,6 @@
 import type { OrderDocument } from "@/lib/models/Order";
 import { formatINR } from "@/lib/commerce-client";
+import { chargeForOrder } from "@/lib/pricing";
 
 function itemsLines(order: OrderDocument) {
   return order.items
@@ -29,13 +30,16 @@ function addressBlock(order: OrderDocument) {
 }
 
 export function customerConfirmationEmail(order: OrderDocument) {
+  const money = chargeForOrder(order);
   const subject = `Order confirmed — ${order.orderNumber}`;
   const text = [
     `Hi ${order.customer.name},`,
     "",
     `Thanks for your CultScribe order ${order.orderNumber}.`,
     `Payment status: ${order.status}`,
-    `Total: ${formatINR(order.subtotal)}`,
+    `Books: ${formatINR(order.subtotal)}`,
+    `Delivery: ${formatINR(money.deliveryCharge)}`,
+    `Total: ${formatINR(money.total)}`,
     "",
     "Items:",
     itemsLines(order),
@@ -53,7 +57,7 @@ export function customerConfirmationEmail(order: OrderDocument) {
       <h2>Order confirmed</h2>
       <p>Hi ${order.customer.name},</p>
       <p>Thanks for your CultScribe order <strong>${order.orderNumber}</strong>.</p>
-      <p>Payment: <strong>${order.status}</strong><br/>Total: <strong>${formatINR(order.subtotal)}</strong></p>
+      <p>Payment: <strong>${order.status}</strong><br/>Books: <strong>${formatINR(order.subtotal)}</strong><br/>Delivery: <strong>${formatINR(money.deliveryCharge)}</strong><br/>Total: <strong>${formatINR(money.total)}</strong></p>
       <h3>Items</h3>
       ${itemsHtml(order)}
       <h3>Delivery details</h3>

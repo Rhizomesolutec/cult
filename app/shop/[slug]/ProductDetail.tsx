@@ -22,6 +22,7 @@ import {
   type NotebookSize,
 } from "@/lib/config/notebook-designs";
 import { PriceTag } from "@/app/components/PriceTag";
+import { staticCatalog } from "@/lib/catalog";
 import {
   NORMAL_COMPARE_AT,
   NORMAL_PRICE,
@@ -38,7 +39,11 @@ type ProductDetailProps = {
 export function ProductDetail({ design, initialSize }: ProductDetailProps) {
   const router = useRouter();
   const { addItem } = useCart();
-  const [bySlug, setBySlug] = useState<Record<string, ProductDTO>>({});
+  const [bySlug, setBySlug] = useState<Record<string, ProductDTO>>(() => {
+    const map: Record<string, ProductDTO> = {};
+    for (const product of staticCatalog()) map[product.slug] = product;
+    return map;
+  });
   const [size, setSize] = useState<NotebookSize>(initialSize);
   const [pageStyle, setPageStyle] = useState<NotebookPageStyle>(
     offeredPageStyles(design)[0],
@@ -46,6 +51,10 @@ export function ProductDetail({ design, initialSize }: ProductDetailProps) {
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState("");
   const [featuresOpen, setFeaturesOpen] = useState(true);
+
+  useEffect(() => {
+    router.prefetch("/cart");
+  }, [router]);
 
   useEffect(() => {
     let cancelled = false;
@@ -64,9 +73,11 @@ export function ProductDetail({ design, initialSize }: ProductDetailProps) {
         if (!res.ok) return;
         const data = (await res.json()) as { products: ProductDTO[] };
         if (cancelled) return;
-        const map: Record<string, ProductDTO> = {};
-        for (const p of data.products ?? []) map[p.slug] = p;
-        setBySlug(map);
+        setBySlug((current) => {
+          const map = { ...current };
+          for (const product of data.products ?? []) map[product.slug] = product;
+          return map;
+        });
       } catch {
         /* static fallback */
       }
@@ -97,24 +108,31 @@ export function ProductDetail({ design, initialSize }: ProductDetailProps) {
     ? null
     : (product?.compareAtPrice ?? NORMAL_COMPARE_AT);
 
-  const onAdd = async () => {
-    if (!product) {
-      setMessage("Loading products — please try again.");
-      return;
-    }
-    if (product.stock < 1) {
+  const onAdd = () => {
+    if (product && product.stock < 1) {
       setMessage("That size is sold out.");
       return;
     }
+    if (!product) return;
     setBusy(true);
     setMessage("");
-    try {
-      await addItem(product.id, 1);
-      router.push("/cart");
-    } catch (e) {
-      setMessage(e instanceof Error ? e.message : "Could not add to cart");
-      setBusy(false);
-    }
+    const mongoId = /^[a-f0-9]{24}$/i.test(product.id) ? product.id : undefined;
+    void addItem({
+      productId: mongoId,
+      slug: product.slug,
+      snapshot: {
+        name: product.name,
+        series: product.series,
+        image: product.image,
+        price: product.price,
+        compareAtPrice: product.compareAtPrice,
+        currency: product.currency,
+        stock: product.stock,
+        size: product.size,
+        specialEdition: product.specialEdition,
+      },
+    });
+    router.push("/cart");
   };
 
   return (

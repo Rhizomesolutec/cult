@@ -13,6 +13,8 @@ type OrderView = {
   status: string;
   fulfillmentStatus?: string;
   subtotal: number;
+  deliveryCharge: number;
+  total: number;
   currency: string;
   customer: {
     name: string;
@@ -245,7 +247,13 @@ export default function OrderPage() {
                 </li>
               ))}
             </ul>
-            <p className={styles.total}>Total · {formatINR(order.subtotal)}</p>
+            <p className={styles.total}>
+              Books · {formatINR(order.subtotal)}
+            </p>
+            <p className={styles.total}>
+              Delivery · {formatINR(order.deliveryCharge)}
+            </p>
+            <p className={styles.total}>Total · {formatINR(order.total)}</p>
           </div>
         ) : null}
 

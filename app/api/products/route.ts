@@ -52,7 +52,7 @@ export async function GET(request: Request) {
     return new NextResponse(cached, {
       headers: {
         "Content-Type": "application/json",
-        "Cache-Control": "private, max-age=60, stale-while-revalidate=300",
+          "Cache-Control": "public, s-maxage=120, stale-while-revalidate=600",
       },
     });
   }
@@ -74,7 +74,7 @@ export async function GET(request: Request) {
     return new NextResponse(body, {
       headers: {
         "Content-Type": "application/json",
-        "Cache-Control": "private, max-age=60, stale-while-revalidate=300",
+          "Cache-Control": "public, s-maxage=120, stale-while-revalidate=600",
       },
     });
   } catch (error) {

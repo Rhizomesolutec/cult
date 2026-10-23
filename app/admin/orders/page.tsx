@@ -11,6 +11,8 @@ type OrderView = {
   status: string;
   fulfillmentStatus: string;
   subtotal: number;
+  deliveryCharge: number;
+  total: number;
   currency: string;
   customer: {
     name: string;
@@ -225,7 +227,11 @@ export default function AdminOrdersPage() {
               ))}
             </ul>
             <p style={{ margin: "0.75rem 0 1rem", fontWeight: 600 }}>
-              Total · {formatINR(order.subtotal)}
+              Books · {formatINR(order.subtotal)}
+              <br />
+              Delivery · {formatINR(order.deliveryCharge)}
+              <br />
+              Total · {formatINR(order.total)}
             </p>
 
             <div className={styles.form} style={{ marginBottom: "1rem" }}>

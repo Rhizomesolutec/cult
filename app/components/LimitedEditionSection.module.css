@@ -101,20 +101,23 @@
 
 .body {
   display: flex;
-  align-items: baseline;
+  flex-wrap: wrap;
+  align-items: center;
   justify-content: space-between;
-  gap: 0.75rem;
+  gap: 0.45rem 0.75rem;
   padding: 0.7rem 0.85rem 0.85rem;
 }
 
 .name {
   margin: 0;
+  min-width: 0;
   font-family: var(--cult-display);
   font-size: clamp(0.95rem, 2.8vw, 1.15rem);
   letter-spacing: 0.04em;
   text-transform: uppercase;
   color: var(--cult-cream-warm, #e8e1d7);
   line-height: 1.2;
+  overflow-wrap: anywhere;
 }
 
 .price {

@@ -11,6 +11,7 @@ type OrderRow = {
   id: string;
   status: string;
   subtotal: number;
+  total?: number;
   customer: { name: string };
 };
 
@@ -47,7 +48,7 @@ export default function AdminDashboardPage() {
   }, []);
 
   const paid = orders.filter((o) => o.status === "paid");
-  const revenue = paid.reduce((sum, o) => sum + o.subtotal, 0);
+  const revenue = paid.reduce((sum, o) => sum + (o.total ?? o.subtotal), 0);
 
   return (
     <AdminShell>

@@ -4,6 +4,7 @@ import { getCartSessionId } from "@/lib/commerce";
 import { Order } from "@/lib/models/Order";
 import { requestAtomToken } from "@/lib/payments/nttdata/client";
 import { createMerchTxnId } from "@/lib/payments/nttdata/config";
+import { payableAmount } from "@/lib/pricing";
 
 function publicInitiateError(error: unknown): string {
   const message = error instanceof Error ? error.message : "";
@@ -75,7 +76,7 @@ export async function POST(req: Request) {
     const merchTxnId = createMerchTxnId();
     const merchTxnDate = new Date().toISOString().slice(0, 10);
     const result = await requestAtomToken({
-      amount: order.subtotal,
+      amount: payableAmount(order),
       custEmail: order.customer.email,
       custMobile: phone.slice(-10),
       orderId: String(order._id),
