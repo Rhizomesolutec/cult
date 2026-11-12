@@ -54,6 +54,16 @@ function titleForStatus(status: string | undefined) {
   return "Order details";
 }
 
+function readAccessToken() {
+  try {
+    return (
+      new URLSearchParams(window.location.search).get("access")?.trim() || ""
+    );
+  } catch {
+    return "";
+  }
+}
+
 export default function OrderPage() {
   const params = useParams<{ id: string }>();
   const router = useRouter();
@@ -68,11 +78,20 @@ export default function OrderPage() {
     let cancelled = false;
     (async () => {
       try {
-        const res = await fetch(`/api/orders/${params.id}`, {
+        const access = readAccessToken();
+        const qs = access ? `?access=${encodeURIComponent(access)}` : "";
+        const res = await fetch(`/api/orders/${params.id}${qs}`, {
           cache: "no-store",
         });
         const data = await res.json();
-        if (!res.ok) throw new Error(data.error || "Failed to load order");
+        if (!res.ok) {
+          if (res.status === 403) {
+            throw new Error(
+              "Unauthorized — open this page from the payment return link (it includes a one-time access token). If you refreshed or shared the URL without ?access=, return from Atom checkout again or contact support with your order id.",
+            );
+          }
+          throw new Error(data.error || "Failed to load order");
+        }
         if (!cancelled) setOrder(data.order);
       } catch (e) {
         if (!cancelled) {
@@ -93,15 +112,17 @@ export default function OrderPage() {
     setStatusMsg("");
     setError("");
     try {
+      const access = readAccessToken();
       const res = await fetch("/api/payments/nttdata/status", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ orderId: params.id }),
+        body: JSON.stringify({ orderId: params.id, access }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Status check failed");
 
-      const orderRes = await fetch(`/api/orders/${params.id}`, {
+      const qs = access ? `?access=${encodeURIComponent(access)}` : "";
+      const orderRes = await fetch(`/api/orders/${params.id}${qs}`, {
         cache: "no-store",
       });
       const orderData = await orderRes.json();
@@ -148,8 +169,8 @@ export default function OrderPage() {
         ) : null}
         {order?.status === "paid" ? (
           <p className={styles.status}>
-            Thanks — we&apos;ve received your payment and will process your
-            order.
+            Payment received via NTT DATA. Your products, totals, and customer
+            details are shown below.
           </p>
         ) : null}
 
@@ -174,31 +195,6 @@ export default function OrderPage() {
                   )}
                 </strong>
               </div>
-              <div>
-                Customer: <strong>{order.customer.name}</strong> (
-                {order.customer.email})
-              </div>
-              {order.customer.phone ? (
-                <div>
-                  Phone: <strong>{order.customer.phone}</strong>
-                </div>
-              ) : null}
-              {(order.customer.address ||
-                order.customer.city ||
-                order.customer.pincode) && (
-                <div>
-                  Delivery:{" "}
-                  <strong>
-                    {[
-                      order.customer.address,
-                      order.customer.city,
-                      order.customer.pincode,
-                    ]
-                      .filter(Boolean)
-                      .join(", ")}
-                  </strong>
-                </div>
-              )}
               {order.payment?.merchTxnId ? (
                 <div>
                   Merchant txn: <strong>{order.payment.merchTxnId}</strong>
@@ -221,11 +217,6 @@ export default function OrderPage() {
                     : ""}
                 </div>
               ) : null}
-              {order.payment?.demoRef ? (
-                <div>
-                  Payment ref: <strong>{order.payment.demoRef}</strong>
-                </div>
-              ) : null}
               {order.delivery?.trackingNumber ? (
                 <div>
                   Tracking: <strong>{order.delivery.trackingNumber}</strong>
@@ -237,6 +228,39 @@ export default function OrderPage() {
                 </div>
               ) : null}
             </div>
+
+            <h3 className={styles.sectionTitle}>Customer details</h3>
+            <div className={styles.meta}>
+              <div>
+                Name: <strong>{order.customer.name}</strong>
+              </div>
+              <div>
+                Email: <strong>{order.customer.email}</strong>
+              </div>
+              {order.customer.phone ? (
+                <div>
+                  Phone: <strong>{order.customer.phone}</strong>
+                </div>
+              ) : null}
+              {(order.customer.address ||
+                order.customer.city ||
+                order.customer.pincode) && (
+                <div>
+                  Delivery:{" "}
+                  <strong>
+                    {[
+                      order.customer.address,
+                      order.customer.city,
+                      order.customer.pincode,
+                    ]
+                      .filter(Boolean)
+                      .join(", ")}
+                  </strong>
+                </div>
+              )}
+            </div>
+
+            <h3 className={styles.sectionTitle}>Products</h3>
             <ul className={styles.list}>
               {order.items.map((item, idx) => (
                 <li key={`${item.name}-${idx}`}>

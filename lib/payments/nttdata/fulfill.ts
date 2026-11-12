@@ -10,6 +10,7 @@ import {
   isPendingPaymentStatus,
   isSuccessfulPaymentStatus,
 } from "./client";
+import { nttdataDiag } from "./diagnostics";
 
 export type FulfillResult = {
   order: OrderDocument;
@@ -50,6 +51,9 @@ export async function applyVerifiedPaymentResult(input: {
   const txnCurrency = instrument.payDetails?.txnCurrency;
 
   if (order.status === "paid") {
+    nttdataDiag("fulfill", "info", "already_paid", {
+      orderIdLen: String(order._id).length,
+    });
     return {
       order,
       alreadyPaid: true,
@@ -186,6 +190,7 @@ export async function applyVerifiedPaymentResult(input: {
     {
       $set: {
         status: "paid",
+        fulfillmentStatus: "confirmed",
         payment: {
           ...order.payment,
           ...paymentPatch,
@@ -248,6 +253,13 @@ export async function applyVerifiedPaymentResult(input: {
   }
 
   const refreshed = (await Order.findById(claimed._id)) as OrderDocument;
+  nttdataDiag("fulfill", "info", "marked_paid", {
+    orderIdLen: String(refreshed._id).length,
+    merchTxnIdLen: String(refreshed.payment?.merchTxnId || "").length,
+    atomTxnIdLen: String(refreshed.payment?.atomTxnId || "").length,
+    fulfillmentStatus: refreshed.fulfillmentStatus,
+    statusCode: String(refreshed.payment?.lastStatusCode || ""),
+  });
   return {
     order: refreshed,
     alreadyPaid: false,

@@ -1,12 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { FormEvent, useState } from "react";
+import { FormEvent, useEffect, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 import { SiteHeader } from "@/app/components/SiteHeader";
-import {
-  buildCheckoutWhatsAppMessage,
-  whatsAppUrl,
-} from "@/app/config/whatsapp";
 import { useCart } from "@/components/CartProvider";
 import { formatINR } from "@/lib/commerce-client";
 import styles from "./page.module.css";
@@ -28,34 +25,98 @@ declare global {
   }
 }
 
-function loadAtomCheckoutScript(src: string): Promise<void> {
+const LOCAL_CHECKOUT_JS = "/payments/nttdata/atomcheckout-uat.js";
+
+function removeFailedCheckoutScripts() {
+  document
+    .querySelectorAll<HTMLScriptElement>(`script[data-nttdata-checkout="1"]`)
+    .forEach((node) => {
+      if (!window.AtomPaynetz) node.remove();
+    });
+}
+
+function loadAtomCheckoutScriptOnce(src: string): Promise<void> {
   return new Promise((resolve, reject) => {
-    const existing = document.querySelector<HTMLScriptElement>(
-      `script[data-nttdata-checkout="1"]`,
-    );
-    if (existing && window.AtomPaynetz) {
+    if (window.AtomPaynetz) {
       resolve();
       return;
     }
+
+    // Reuse an in-flight script tag so the CDN is not requested twice.
+    const existing = document.querySelector<HTMLScriptElement>(
+      `script[data-nttdata-checkout="1"][data-src-base="${CSS.escape(src)}"]`,
+    );
     if (existing) {
-      existing.addEventListener("load", () => resolve(), { once: true });
+      existing.addEventListener("load", () => {
+        if (window.AtomPaynetz) resolve();
+        else reject(new Error("NTT DATA checkout library did not initialize"));
+      }, { once: true });
       existing.addEventListener(
         "error",
-        () => reject(new Error("Failed to load NTT DATA checkout script")),
+        () =>
+          reject(
+            new Error(
+              `Failed to load NTT DATA checkout script from ${
+                src.startsWith("/") ? "local fallback" : "UAT CDN"
+              }`,
+            ),
+          ),
         { once: true },
       );
       return;
     }
 
+    removeFailedCheckoutScripts();
+
     const script = document.createElement("script");
-    script.src = `${src}${src.includes("?") ? "&" : "?"}v=${Date.now()}`;
+    const withCacheBust = `${src}${src.includes("?") ? "&" : "?"}v=${Date.now()}`;
+    script.src = withCacheBust;
     script.async = true;
     script.dataset.nttdataCheckout = "1";
-    script.onload = () => resolve();
-    script.onerror = () =>
-      reject(new Error("Failed to load NTT DATA checkout script"));
+    script.dataset.srcBase = src;
+    script.onload = () => {
+      if (window.AtomPaynetz) resolve();
+      else {
+        script.remove();
+        reject(new Error("NTT DATA checkout library did not initialize"));
+      }
+    };
+    script.onerror = () => {
+      script.remove();
+      reject(
+        new Error(
+          `Failed to load NTT DATA checkout script from ${
+            src.startsWith("/") ? "local fallback" : "UAT CDN"
+          }`,
+        ),
+      );
+    };
     document.head.appendChild(script);
   });
+}
+
+async function loadAtomCheckoutScript(src: string): Promise<void> {
+  const candidates = [src];
+  if (src !== LOCAL_CHECKOUT_JS) {
+    candidates.push(LOCAL_CHECKOUT_JS);
+  }
+
+  let lastError: Error | null = null;
+  for (const candidate of candidates) {
+    try {
+      await loadAtomCheckoutScriptOnce(candidate);
+      return;
+    } catch (err) {
+      lastError = err instanceof Error ? err : new Error(String(err));
+    }
+  }
+
+  throw (
+    lastError ||
+    new Error(
+      "Failed to load NTT DATA checkout script. The UAT CDN may be temporarily unavailable.",
+    )
+  );
 }
 
 /** Remove Atom SDK loader / iframe leftovers after a failed open. */
@@ -74,8 +135,9 @@ function getCheckoutFrameHttpStatus(): number | undefined {
     .reverse()
     .find((e) => e.name.includes("checkout-frame.jsp"));
   if (!hit) return undefined;
-  const status = (hit as PerformanceResourceTiming & { responseStatus?: number })
-    .responseStatus;
+  const status = (
+    hit as PerformanceResourceTiming & { responseStatus?: number }
+  ).responseStatus;
   return typeof status === "number" && status > 0 ? status : undefined;
 }
 
@@ -116,7 +178,6 @@ function watchAtomCheckoutOpen(
         clearAtomSdkUi();
         reject(err);
       } else {
-        // Payment UI is up — leave Atom iframe/loader to the SDK.
         resolve();
       }
     };
@@ -151,24 +212,28 @@ function watchAtomCheckoutOpen(
       }
 
       const frameStatus = getCheckoutFrameHttpStatus();
-      if (frameStatus === 403) {
-        console.info("[nttdata checkout] frame_http", { status: 403 });
+      if (frameStatus === 403 || frameStatus === 404 || frameStatus === 503) {
+        console.info("[nttdata checkout] frame_http", { status: frameStatus });
         finish(
           new Error(
-            returnUrlIsLocal
-              ? "Payment page was blocked (HTTP 403). Set NEXT_PUBLIC_APP_URL to a public HTTPS URL (e.g. a tunnel) that is whitelisted with NTT DATA UAT, restart the server, and try again."
-              : "Payment page was blocked (HTTP 403). Confirm your return URL domain is whitelisted with NTT DATA UAT, then try again.",
+            frameStatus === 503
+              ? "NTT DATA UAT payment page is temporarily unavailable (HTTP 503). Please try again in a few minutes."
+              : returnUrlIsLocal
+                ? "Payment page was blocked. Set NEXT_PUBLIC_APP_URL to a public HTTPS URL whitelisted with NTT DATA UAT, restart the server, and try again."
+                : "Payment page was blocked. Confirm your return URL domain is whitelisted with NTT DATA UAT, then try again.",
           ),
         );
         return;
       }
 
-      // Frame visible = hosted checkout opened (Atom may still show its loader).
-      if (isAtomIframeVisible() && frameStatus !== undefined && frameStatus < 400) {
+      if (
+        isAtomIframeVisible() &&
+        frameStatus !== undefined &&
+        frameStatus < 400
+      ) {
         console.info("[nttdata checkout] frame_open", { status: frameStatus });
         finish();
       } else if (isAtomIframeVisible() && frameStatus === undefined) {
-        // Frame shown; status may be unavailable in some browsers — treat as open.
         console.info("[nttdata checkout] frame_open", { status: "unknown" });
         finish();
       }
@@ -187,19 +252,20 @@ function watchAtomCheckoutOpen(
         returnUrlIsLocal,
       });
 
-      if (frameStatus === 403) {
+      if (frameStatus === 403 || frameStatus === 404 || frameStatus === 503) {
         finish(
           new Error(
-            returnUrlIsLocal
-              ? "Payment page was blocked (HTTP 403). Use a public HTTPS NEXT_PUBLIC_APP_URL whitelisted for NTT DATA UAT."
-              : "Payment page was blocked (HTTP 403). Confirm return URL whitelist with NTT DATA UAT.",
+            frameStatus === 503
+              ? "NTT DATA UAT payment page is temporarily unavailable (HTTP 503). Please try again in a few minutes."
+              : returnUrlIsLocal
+                ? "Payment page was blocked. Use a public HTTPS NEXT_PUBLIC_APP_URL whitelisted for NTT DATA UAT."
+                : "Payment page was blocked. Confirm return URL whitelist with NTT DATA UAT.",
           ),
         );
         return;
       }
 
       if (iframeVisible) {
-        // Hosted UI is showing; do not fail because Atom left its loader up.
         finish();
         return;
       }
@@ -216,7 +282,8 @@ function watchAtomCheckoutOpen(
 }
 
 export default function CheckoutPage() {
-  const { cart, loading, refresh } = useCart();
+  const router = useRouter();
+  const { cart, loading } = useCart();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
@@ -225,12 +292,23 @@ export default function CheckoutPage() {
   const [pincode, setPincode] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
+  const [localReturnWarning, setLocalReturnWarning] = useState(false);
+  const attemptRef = useRef(0);
+
+  useEffect(() => {
+    return () => {
+      clearAtomSdkUi();
+    };
+  }, []);
 
   const onSubmit = async (e: FormEvent) => {
     e.preventDefault();
     if (busy) return;
     setError("");
+    setLocalReturnWarning(false);
+    clearAtomSdkUi();
     setBusy(true);
+    const attempt = ++attemptRef.current;
 
     try {
       const checkoutRes = await fetch("/api/checkout", {
@@ -250,33 +328,106 @@ export default function CheckoutPage() {
         throw new Error(checkoutData.error || "Checkout failed");
       }
 
-      const order = checkoutData.order as { orderNumber: string };
-      const url = whatsAppUrl(
-        buildCheckoutWhatsAppMessage({
-          orderNumber: order.orderNumber,
-          name,
-          email,
-          phone,
-          address,
-          city,
-          pincode,
-          items: cart.items.map((item) => ({
-            name: item.name,
-            quantity: item.quantity,
-            lineTotal: item.lineTotal,
-          })),
-          subtotal: cart.subtotal,
-          deliveryCharge: cart.deliveryCharge,
-        }),
-      );
+      const order = checkoutData.order as { id: string; orderNumber: string };
 
-      window.open(url, "_blank", "noopener,noreferrer");
-      await fetch("/api/cart", { method: "DELETE" });
-      await refresh();
+      const payRes = await fetch("/api/payments/nttdata/initiate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ orderId: order.id }),
+      });
+      const payData = await payRes.json();
+      console.info("[nttdata checkout] initiate", {
+        httpStatus: payRes.status,
+        fields:
+          payData && typeof payData === "object" ? Object.keys(payData) : [],
+        hasAtomTokenId: Boolean(payData?.atomTokenId),
+        atomTokenIdLen:
+          typeof payData?.atomTokenId === "string" ||
+          typeof payData?.atomTokenId === "number"
+            ? String(payData.atomTokenId).length
+            : 0,
+        returnUrlIsLocal: Boolean(payData?.returnUrlIsLocal),
+        attempt,
+      });
+      if (!payRes.ok) {
+        throw new Error(payData.error || "Payment initiation failed");
+      }
+
+      if (payData.alreadyPaid) {
+        const access =
+          typeof payData.access === "string" ? payData.access.trim() : "";
+        router.push(
+          access
+            ? `/order/${order.id}?access=${encodeURIComponent(access)}`
+            : `/order/${order.id}`,
+        );
+        return;
+      }
+
+      const returnUrlIsLocal = Boolean(payData.returnUrlIsLocal);
+      const returnUrlIsHttps = payData.returnUrlIsHttps !== false;
+      if (returnUrlIsLocal || !returnUrlIsHttps) {
+        setLocalReturnWarning(true);
+        console.info("[nttdata checkout] warning", {
+          code: "RETURN_URL_NOT_PUBLIC_HTTPS",
+        });
+        throw new Error(
+          "Atom UAT requires a public HTTPS return URL. Set NTTDATA_RETURN_APP_URL to your HTTPS tunnel/preview origin, whitelist it with NDPS, restart, and try again.",
+        );
+      }
+
+      await loadAtomCheckoutScript(String(payData.checkoutJsUrl));
+      if (!window.AtomPaynetz) {
+        throw new Error("NTT DATA checkout library did not load");
+      }
+
+      // Official AIPAY kit: only these five fields are mandatory.
+      const options = {
+        atomTokenId: String(payData.atomTokenId),
+        merchId: String(payData.merchId),
+        custEmail: String(payData.custEmail),
+        custMobile: String(payData.custMobile),
+        returnUrl: String(payData.returnUrl),
+      };
+
+      console.info("[nttdata checkout] AtomPaynetz", {
+        optionKeys: Object.keys(options),
+        env: "uat",
+        atomTokenIdLen: options.atomTokenId.length,
+        merchIdLen: options.merchId.length,
+        custMobileLen: options.custMobile.length,
+        returnUrlHost: (() => {
+          try {
+            return new URL(options.returnUrl).hostname;
+          } catch {
+            return "invalid";
+          }
+        })(),
+        returnUrlProtocol: (() => {
+          try {
+            return new URL(options.returnUrl).protocol;
+          } catch {
+            return "invalid";
+          }
+        })(),
+        returnUrlSource:
+          typeof payData.returnUrlSource === "string"
+            ? payData.returnUrlSource
+            : null,
+      });
+
+      // Opens the real NTT DATA UAT payment page (card / UPI / net banking).
+      // After payment, Atom POSTs encData to returnUrl → callback → /order/:id.
+      new window.AtomPaynetz(options, "uat");
+      await watchAtomCheckoutOpen({ returnUrlIsLocal: false });
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Checkout failed");
+      if (attempt === attemptRef.current) {
+        setError(err instanceof Error ? err.message : "Checkout failed");
+      }
     } finally {
-      setBusy(false);
+      if (attempt === attemptRef.current) {
+        setBusy(false);
+      }
     }
   };
 
@@ -285,10 +436,11 @@ export default function CheckoutPage() {
       <SiteHeader />
       <main className={styles.page}>
         <span className={styles.eyebrow}>Checkout</span>
-        <h1 className={styles.title}>Confirm your order</h1>
+        <h1 className={styles.title}>NTT DATA test payment</h1>
         <p className={styles.lead}>
-          Enter your delivery details. The confirm button opens WhatsApp with
-          your notebooks, quantities, and total so we can complete the order.
+          Enter your delivery details, then pay with the NTT DATA Atom UAT
+          gateway. After a successful test payment you return here and see your
+          products, total, and customer details on the order page.
         </p>
 
         {loading ? <p className={styles.lead}>Loading…</p> : null}
@@ -333,6 +485,16 @@ export default function CheckoutPage() {
               <p className={styles.total}>Total · {formatINR(cart.total)}</p>
             </div>
 
+            <p className={styles.payBadge}>NTT DATA · Atom AIPAY · UAT test</p>
+
+            {localReturnWarning ? (
+              <p className={styles.note} role="status">
+                Atom UAT needs a public HTTPS return URL. Set{" "}
+                <code>NTTDATA_RETURN_APP_URL=https://www.cultscribe.com</code>{" "}
+                (whitelisted with NDPS), then restart the server.
+              </p>
+            ) : null}
+
             {error ? <p className={styles.error}>{error}</p> : null}
 
             <form className={styles.form} onSubmit={(e) => void onSubmit(e)}>
@@ -362,7 +524,7 @@ export default function CheckoutPage() {
               />
 
               <label className={styles.label} htmlFor="phone">
-                Phone
+                Phone (for payment)
               </label>
               <input
                 id="phone"
@@ -416,16 +578,25 @@ export default function CheckoutPage() {
                   type="submit"
                   disabled={busy}
                 >
-                  {busy ? "Opening WhatsApp…" : "Confirm on WhatsApp"}
+                  {busy
+                    ? "Opening NTT DATA payment…"
+                    : "Pay with NTT DATA (UAT test)"}
                 </button>
                 <Link className={`${styles.btn} ${styles.btnGhost}`} href="/cart">
                   Back to cart
                 </Link>
               </div>
-              <p className={styles.note}>
-                Confirm opens WhatsApp with this order. Online card payment is
-                paused for now.
-              </p>
+              <div className={styles.testHint}>
+                <strong>UAT test instruments (official Atom sandbox)</strong>
+                <br />
+                Card: 4012 8888 8888 1881 · Expiry: any future date · CVV: 123 ·
+                Name: Test
+                <br />
+                UPI: atomots@upi
+                <br />
+                After payment, Atom returns you to the order page with your
+                products and delivery details.
+              </div>
             </form>
           </div>
         ) : null}

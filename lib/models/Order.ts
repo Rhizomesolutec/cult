@@ -69,6 +69,9 @@ export type OrderAttrs = {
     lastStatusCode?: string;
     lastStatusMessage?: string;
     verifiedAt?: Date;
+    /** Short-lived post-payment order page access token */
+    viewToken?: string;
+    viewTokenExpiresAt?: Date;
   };
   delivery: {
     agencyName: string;
@@ -169,6 +172,8 @@ const OrderSchema = new Schema<OrderAttrs>(
       lastStatusCode: { type: String, default: "" },
       lastStatusMessage: { type: String, default: "" },
       verifiedAt: { type: Date },
+      viewToken: { type: String, default: "" },
+      viewTokenExpiresAt: { type: Date },
     },
     delivery: {
       agencyName: { type: String, default: "" },

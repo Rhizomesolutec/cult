@@ -3,7 +3,17 @@ import { connectDB } from "@/lib/db";
 import { getCartSessionId } from "@/lib/commerce";
 import { Order } from "@/lib/models/Order";
 import { requestAtomToken } from "@/lib/payments/nttdata/client";
-import { createMerchTxnId } from "@/lib/payments/nttdata/config";
+import {
+  createMerchTxnId,
+  getNttDataConfig,
+  resolveAtomReturnAppUrl,
+  resolveCheckoutJsUrl,
+} from "@/lib/payments/nttdata/config";
+import { nttdataDiag } from "@/lib/payments/nttdata/diagnostics";
+import {
+  createOrderAccessToken,
+  issueOrderViewToken,
+} from "@/lib/payments/nttdata/order-access";
 import { payableAmount } from "@/lib/pricing";
 
 function publicInitiateError(error: unknown): string {
@@ -13,6 +23,12 @@ function publicInitiateError(error: unknown): string {
     message.includes("is set but empty")
   ) {
     return "Payment gateway is not configured";
+  }
+  if (
+    message.includes("NTTDATA_RETURN_APP_URL") ||
+    message.includes("Atom UAT requires a public HTTPS return URL")
+  ) {
+    return message;
   }
   if (message.includes("UAT") || message.includes("disabled")) {
     return "Payment gateway configuration error";
@@ -40,10 +56,17 @@ export async function POST(req: Request) {
     }
 
     if (order.status === "paid") {
+      let access = "";
+      try {
+        access = await issueOrderViewToken(order);
+      } catch {
+        access = createOrderAccessToken(String(order._id), order.sessionId);
+      }
       return NextResponse.json({
         alreadyPaid: true,
         orderId: String(order._id),
         orderNumber: order.orderNumber,
+        access,
       });
     }
 
@@ -55,7 +78,6 @@ export async function POST(req: Request) {
     }
 
     if (order.status === "failed") {
-      // Allow a new payment attempt after a prior failed attempt.
       order.status = "pending_payment";
       order.fulfillmentStatus = "awaiting_payment";
     }
@@ -71,8 +93,18 @@ export async function POST(req: Request) {
       );
     }
 
-    // Always request a fresh Atom token. The UAT SDK binds the token via mConfig;
-    // reusing a token after a failed checkout-frame open commonly keeps failing.
+    // Validate public HTTPS Atom return URL before requesting a token.
+    const config = getNttDataConfig();
+    const returnOrigin = resolveAtomReturnAppUrl(config.appUrl);
+    const returnUrl = `${returnOrigin.appUrl}/api/payments/nttdata/callback`;
+    let returnHost = "";
+    try {
+      returnHost = new URL(returnUrl).hostname;
+    } catch {
+      returnHost = "";
+    }
+
+    // Fresh Atom token every attempt — required for the hosted UAT payment page.
     const merchTxnId = createMerchTxnId();
     const merchTxnDate = new Date().toISOString().slice(0, 10);
     const result = await requestAtomToken({
@@ -102,48 +134,24 @@ export async function POST(req: Request) {
     };
     await order.save();
 
-    // Callback/return URL is always derived from NEXT_PUBLIC_APP_URL (via config.appUrl).
-    const returnUrl = `${result.config.appUrl}/api/payments/nttdata/callback`;
-    let returnHost = "";
-    let returnProtocol = "";
-    try {
-      const parsed = new URL(returnUrl);
-      returnHost = parsed.hostname;
-      returnProtocol = parsed.protocol;
-    } catch {
-      returnHost = "";
-      returnProtocol = "";
-    }
-    const returnUrlIsLocal =
-      returnHost === "localhost" || returnHost === "127.0.0.1";
-    const returnUrlIsHttps = returnProtocol === "https:";
+    const resolvedCheckout = await resolveCheckoutJsUrl(
+      result.config.checkoutJsUrl,
+    );
 
-    // Safe diagnostics only — never log tokens, keys, customer data, or full URLs.
-    console.info("[POST /api/payments/nttdata/initiate]", {
-      httpStatus: 200,
-      fields: [
-        "atomTokenId",
-        "merchId",
-        "custEmail",
-        "custMobile",
-        "returnUrl",
-        "checkoutJsUrl",
-        "env",
-      ],
+    nttdataDiag("initiate", "info", "ready", {
+      orderIdLen: String(order._id).length,
+      merchTxnIdLen: result.merchTxnId.length,
       atomTokenIdLen: result.atomTokenId.length,
       merchIdLen: result.config.merchantId.length,
+      amount: payableAmount(order),
       txnStatusCode: result.txnStatusCode,
       returnHost,
-      returnProtocol,
-      returnUrlIsLocal,
-      returnUrlIsHttps,
-      checkoutJsHost: (() => {
-        try {
-          return new URL(result.config.checkoutJsUrl).hostname;
-        } catch {
-          return "invalid";
-        }
-      })(),
+      returnUrlIsHttps: true,
+      returnUrlSource: returnOrigin.source,
+      checkoutJsFallback: resolvedCheckout.usedFallback,
+      checkoutHost: resolvedCheckout.checkoutJsUrl.startsWith("/")
+        ? "local_fallback"
+        : "pgtest.atomtech.in",
       env: "uat",
     });
 
@@ -155,19 +163,28 @@ export async function POST(req: Request) {
       custEmail: order.customer.email,
       custMobile: phone.slice(-10),
       returnUrl,
-      checkoutJsUrl: result.config.checkoutJsUrl,
+      checkoutJsUrl: resolvedCheckout.checkoutJsUrl,
+      checkoutJsFallback: resolvedCheckout.usedFallback,
       env: "uat" as const,
-      returnUrlIsLocal,
-      returnUrlIsHttps,
+      returnUrlIsLocal: false,
+      returnUrlIsHttps: true,
+      returnUrlSource: returnOrigin.source,
     });
   } catch (error) {
-    console.error(
-      "[POST /api/payments/nttdata/initiate]",
-      error instanceof Error ? error.message : "unknown",
-    );
-    return NextResponse.json(
-      { error: publicInitiateError(error) },
-      { status: 500 },
-    );
+    const message = error instanceof Error ? error.message : "unknown";
+    const publicMessage = publicInitiateError(error);
+    const status =
+      publicMessage.includes("NTTDATA_RETURN_APP_URL") ||
+      publicMessage.includes("Atom UAT requires a public HTTPS return URL")
+        ? 400
+        : 500;
+    nttdataDiag("initiate", "error", "failed", {
+      httpStatus: status,
+      owner: message.includes("NTT DATA request failed")
+        ? "atom_or_network"
+        : "application",
+      reason: publicMessage.slice(0, 160),
+    });
+    return NextResponse.json({ error: publicMessage }, { status });
   }
 }

@@ -2,11 +2,12 @@ import { NextResponse } from "next/server";
 import { connectDB } from "@/lib/db";
 import { getCartSessionId } from "@/lib/commerce";
 import { Order } from "@/lib/models/Order";
+import { verifyOrderAccessToken } from "@/lib/payments/nttdata/order-access";
 import { chargeForOrder } from "@/lib/pricing";
 
 type Params = { params: Promise<{ id: string }> };
 
-export async function GET(_req: Request, { params }: Params) {
+export async function GET(req: Request, { params }: Params) {
   try {
     const { id } = await params;
     await connectDB();
@@ -17,7 +18,19 @@ export async function GET(_req: Request, { params }: Params) {
     }
 
     const sessionId = await getCartSessionId();
-    if (!sessionId || order.sessionId !== sessionId) {
+    const access = new URL(req.url).searchParams.get("access")?.trim() || "";
+    const sessionOk = Boolean(sessionId && order.sessionId === sessionId);
+    const accessOk = Boolean(
+      access &&
+        verifyOrderAccessToken(
+          String(order._id),
+          order.sessionId,
+          access,
+          order,
+        ),
+    );
+
+    if (!sessionOk && !accessOk) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
     }
 

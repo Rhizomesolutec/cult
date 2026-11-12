@@ -50,6 +50,16 @@
   color: #1a1714;
 }
 
+.sectionTitle {
+  margin: 1.35rem 0 0.65rem;
+  font-family: var(--cult-sans);
+  font-size: var(--text-xs);
+  font-weight: 700;
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+  color: #1a1714;
+}
+
 .meta {
   display: grid;
   gap: 0.35rem;

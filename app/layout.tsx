@@ -18,6 +18,11 @@ export const metadata: Metadata = {
   title: "CultScribe — Where Legends Live Forever",
   description:
     "Stationery inspired by rock and metal. Raw. Real. Written. Notebooks that honor music history—write boldly, think freely.",
+  icons: {
+    icon: [{ url: "/logo.webp", type: "image/webp" }],
+    shortcut: ["/logo.webp"],
+    apple: [{ url: "/logo.webp" }],
+  },
   openGraph: {
     title: "CultScribe",
     description: "Where Legends Live Forever. Raw. Real. Written.",
@@ -30,7 +35,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" data-scroll-behavior="smooth">
       <body>
         <Script id="meta-pixel" strategy="afterInteractive">
           {`

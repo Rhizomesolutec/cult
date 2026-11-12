@@ -5,6 +5,15 @@ const nextConfig: NextConfig = {
   devIndicators: {
     position: "bottom-right",
   },
+  async redirects() {
+    return [
+      {
+        source: "/favicon.ico",
+        destination: "/logo.webp",
+        permanent: false,
+      },
+    ];
+  },
   images: {
     formats: ["image/webp"],
     minimumCacheTTL: 60 * 60 * 24 * 30,

@@ -4,17 +4,20 @@ import { getCartSessionId } from "@/lib/commerce";
 import { notifyOrderPaid } from "@/lib/email/order-notifications";
 import { Order } from "@/lib/models/Order";
 import {
+  isSuccessfulPaymentStatus,
   requeryTransactionStatus,
   verifyPaymentResponseSignature,
   verifyStatusResponseSignature,
 } from "@/lib/payments/nttdata/client";
 import { getNttDataConfig } from "@/lib/payments/nttdata/config";
+import { nttdataDiag } from "@/lib/payments/nttdata/diagnostics";
 import { applyVerifiedPaymentResult } from "@/lib/payments/nttdata/fulfill";
+import { verifyOrderAccessToken } from "@/lib/payments/nttdata/order-access";
 import { payableAmount } from "@/lib/pricing";
 
 export async function POST(req: Request) {
   try {
-    const body = (await req.json()) as { orderId?: string };
+    const body = (await req.json()) as { orderId?: string; access?: string };
     const orderId = body.orderId?.trim();
     if (!orderId) {
       return NextResponse.json({ error: "orderId is required" }, { status: 400 });
@@ -27,7 +30,18 @@ export async function POST(req: Request) {
     }
 
     const sessionId = await getCartSessionId();
-    if (!sessionId || order.sessionId !== sessionId) {
+    const access = body.access?.trim() || "";
+    const sessionOk = Boolean(sessionId && order.sessionId === sessionId);
+    const accessOk = Boolean(
+      access &&
+        verifyOrderAccessToken(
+          String(order._id),
+          order.sessionId,
+          access,
+          order,
+        ),
+    );
+    if (!sessionOk && !accessOk) {
       return NextResponse.json({ error: "Unauthorized order" }, { status: 403 });
     }
 
@@ -98,12 +112,28 @@ export async function POST(req: Request) {
         verifyPaymentResponseSignature(instrument);
     }
 
+    const statusCode = String(instrument.responseDetails?.statusCode ?? "");
+    nttdataDiag("status", "info", "requery_result", {
+      orderIdLen: orderId.length,
+      statusCode: statusCode || "missing",
+      signatureValid,
+    });
     const result = await applyVerifiedPaymentResult({
       order,
       instrument,
       expectedMerchantId: config.merchantId,
-      requireSignatureValid: Boolean(callbackSig),
+      // Never mark paid on a successful-looking status without signature verification.
+      requireSignatureValid: isSuccessfulPaymentStatus(statusCode),
       signatureValid,
+    });
+
+    nttdataDiag("status", "info", "fulfillment", {
+      orderStatus: result.order.status,
+      fulfillmentStatus: result.order.fulfillmentStatus,
+      markedPaid: result.markedPaid,
+      alreadyPaid: result.alreadyPaid,
+      markedFailed: result.markedFailed,
+      stillPending: result.stillPending,
     });
 
     return NextResponse.json({
@@ -122,7 +152,10 @@ export async function POST(req: Request) {
   } catch (error) {
     const message =
       error instanceof Error ? error.message : "Failed to check payment status";
-    console.error("[POST /api/payments/nttdata/status]", message);
+    nttdataDiag("status", "error", "failed", {
+      owner: message.includes("NTT DATA") ? "atom_or_network" : "application",
+      reason: message.slice(0, 120),
+    });
     // Do not return raw gateway/Mongoose/internal details to the browser.
     const allowExact = new Set([
       "orderId is required",

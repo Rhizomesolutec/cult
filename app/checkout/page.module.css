@@ -159,12 +159,39 @@
 }
 
 .btnPay {
-  background: #25d366;
+  background: var(--cult-red, #c41230);
   color: #fff;
 }
 
 .btnPay:hover:not(:disabled) {
-  background: #1ebe57;
+  background: #a30f28;
+}
+
+.payBadge {
+  display: inline-block;
+  margin: 0 0 0.85rem;
+  padding: 0.35rem 0.65rem;
+  border: 1px solid #d5d0c8;
+  background: #f7f5f2;
+  color: #1a1714;
+  font-size: var(--text-2xs);
+  font-weight: 700;
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+}
+
+.testHint {
+  margin: 0.75rem 0 0;
+  padding: 0.85rem 1rem;
+  border: 1px solid #e4e0db;
+  background: #faf9f7;
+  font-size: var(--text-sm);
+  line-height: 1.45;
+  color: #5c574f;
+}
+
+.testHint strong {
+  color: #1a1714;
 }
 
 .btnPay:disabled {

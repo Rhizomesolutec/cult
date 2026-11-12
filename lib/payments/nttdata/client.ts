@@ -11,6 +11,7 @@ import {
   buildStatusSignatureString,
   hmacSha512Hex,
 } from "./crypto";
+import { nttdataDiag } from "./diagnostics";
 import type { AtomAuthSuccess, AtomCallbackPayload, AtomPaymentInstrument } from "./types";
 
 const STATUS_API = "TXNVERIFICATION";
@@ -142,7 +143,26 @@ export async function requestAtomToken(input: {
   });
 
   const encData = atomEncrypt(json, config.requestEncryptionKey);
-  const raw = await postEncrypted(config.paymentUrl, encData, config.merchantId);
+  nttdataDiag("auth", "info", "request_started", {
+    merchIdLen: config.merchantId.length,
+    merchTxnIdLen: merchTxnId.length,
+    amount: formatNttAmount(input.amount),
+    product: config.product,
+    paymentHost: new URL(config.paymentUrl).hostname,
+    env: config.env,
+  });
+
+  let raw = "";
+  try {
+    raw = await postEncrypted(config.paymentUrl, encData, config.merchantId);
+  } catch (error) {
+    nttdataDiag("auth", "error", "request_failed", {
+      reason: error instanceof Error ? error.message : "unknown",
+      owner: "atom_or_network",
+    });
+    throw error;
+  }
+
   const encResp = extractEncData(raw);
   const decrypted = atomDecrypt(encResp, config.responseEncryptionKey);
   const parsed = JSON.parse(decrypted) as AtomCallbackPayload & {
@@ -158,8 +178,19 @@ export async function requestAtomToken(input: {
   const atomTokenId = parsed.atomTokenId != null ? String(parsed.atomTokenId) : "";
 
   if (txnStatusCode !== "OTS0000" || !atomTokenId) {
+    nttdataDiag("auth", "error", "token_rejected", {
+      txnStatusCode: txnStatusCode || "missing",
+      tokenPresent: Boolean(atomTokenId),
+      owner: "atom",
+    });
     throw new Error("Failed to obtain Atom Token ID from NTT DATA");
   }
+
+  nttdataDiag("auth", "info", "token_ok", {
+    txnStatusCode,
+    atomTokenIdLen: atomTokenId.length,
+    merchTxnIdLen: merchTxnId.length,
+  });
 
   return { atomTokenId, merchTxnId, txnStatusCode, config };
 }
@@ -295,8 +326,16 @@ export async function requeryTransactionStatus(input: {
   const parsed = JSON.parse(decrypted) as AtomCallbackPayload;
   const instrument = getPayInstrument(parsed);
   if (!instrument) {
+    nttdataDiag("status", "error", "missing_pay_instrument", {
+      owner: "atom",
+    });
     throw new Error("NTT DATA status response missing payInstrument");
   }
+  nttdataDiag("status", "info", "requery_ok", {
+    merchTxnIdLen: input.merchTxnId.length,
+    atomTxnIdLen: input.atomTxnId.length,
+    statusCode: String(instrument.responseDetails?.statusCode ?? ""),
+  });
   return instrument;
 }
 
