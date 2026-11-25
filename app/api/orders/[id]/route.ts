@@ -54,8 +54,14 @@ export async function GET(req: Request, { params }: Params) {
           quantity: i.quantity,
           lineTotal: i.unitPrice * i.quantity,
         })),
-        payment: order.payment,
-        delivery: order.delivery || {},
+        payment: {
+          merchTxnId: order.payment?.merchTxnId || undefined,
+          atomTxnId: order.payment?.atomTxnId || undefined,
+          gatewayPaymentId: order.payment?.gatewayPaymentId || undefined,
+        },
+        delivery: {
+          trackingNumber: order.delivery?.trackingNumber || undefined,
+        },
         createdAt: (order as { createdAt?: Date }).createdAt,
       },
     });

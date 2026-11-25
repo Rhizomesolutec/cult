@@ -189,20 +189,6 @@
   text-transform: uppercase;
 }
 
-.testHint {
-  margin: 0.75rem 0 0;
-  padding: 0.85rem 1rem;
-  border: 1px solid #e4e0db;
-  background: #faf9f7;
-  font-size: var(--text-sm);
-  line-height: 1.45;
-  color: #5c574f;
-}
-
-.testHint strong {
-  color: #1a1714;
-}
-
 .btnPay:disabled {
   opacity: 0.55;
   cursor: not-allowed;

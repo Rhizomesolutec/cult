@@ -31,27 +31,26 @@ type OrderView = {
     lineTotal: number;
   }[];
   payment?: {
-    provider?: string;
-    demoRef?: string;
     merchTxnId?: string;
     atomTxnId?: string;
-    bankTxnId?: string;
     gatewayPaymentId?: string;
-    lastStatusCode?: string;
-    lastStatusMessage?: string;
   };
   delivery?: {
-    agencyName?: string;
     trackingNumber?: string;
-    notes?: string;
   };
 };
 
 function titleForStatus(status: string | undefined) {
-  if (status === "paid") return "Payment complete";
+  if (status === "paid") return "Payment successful";
   if (status === "failed" || status === "cancelled") return "Payment failed";
   if (status === "pending_payment") return "Payment pending";
   return "Order details";
+}
+
+function formatStatusLabel(value: string | undefined, fallback: string) {
+  const raw = (value || fallback).replace(/_/g, " ").trim();
+  if (!raw) return fallback;
+  return raw.charAt(0).toUpperCase() + raw.slice(1);
 }
 
 function readAccessToken() {
@@ -87,7 +86,7 @@ export default function OrderPage() {
         if (!res.ok) {
           if (res.status === 403) {
             throw new Error(
-              "Unauthorized — open this page from the payment return link (it includes a one-time access token). If you refreshed or shared the URL without ?access=, return from Atom checkout again or contact support with your order id.",
+              "Unable to load this order. Please open the link from your order confirmation or contact support with your order number.",
             );
           }
           throw new Error(data.error || "Failed to load order");
@@ -134,8 +133,7 @@ export default function OrderPage() {
         setStatusMsg("Payment was not successful.");
       } else {
         setStatusMsg(
-          data.order?.payment?.lastStatusMessage ||
-            "Payment is still pending. Try again shortly.",
+          "Payment is still pending. Try again shortly.",
         );
       }
     } catch (e) {
@@ -169,8 +167,7 @@ export default function OrderPage() {
         ) : null}
         {order?.status === "paid" ? (
           <p className={styles.status}>
-            Payment received via NTT DATA. Your products, totals, and customer
-            details are shown below.
+            Payment successful. Thank you for your order. Your order details are below.
           </p>
         ) : null}
 
@@ -184,15 +181,12 @@ export default function OrderPage() {
             <div className={styles.meta}>
               <div>
                 Payment:{" "}
-                <strong>{order.status.replace(/_/g, " ")}</strong>
+                <strong>{formatStatusLabel(order.status, "pending_payment")}</strong>
               </div>
               <div>
                 Fulfillment:{" "}
                 <strong>
-                  {(order.fulfillmentStatus || "awaiting_payment").replace(
-                    /_/g,
-                    " ",
-                  )}
+                  {formatStatusLabel(order.fulfillmentStatus, "awaiting_payment")}
                 </strong>
               </div>
               {order.payment?.merchTxnId ? (
@@ -208,23 +202,9 @@ export default function OrderPage() {
                   </strong>
                 </div>
               ) : null}
-              {order.payment?.lastStatusCode ? (
-                <div>
-                  Gateway status:{" "}
-                  <strong>{order.payment.lastStatusCode}</strong>
-                  {order.payment.lastStatusMessage
-                    ? ` — ${order.payment.lastStatusMessage}`
-                    : ""}
-                </div>
-              ) : null}
               {order.delivery?.trackingNumber ? (
                 <div>
                   Tracking: <strong>{order.delivery.trackingNumber}</strong>
-                </div>
-              ) : null}
-              {order.delivery?.notes ? (
-                <div>
-                  Notice: <strong>{order.delivery.notes}</strong>
                 </div>
               ) : null}
             </div>

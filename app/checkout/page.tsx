@@ -1,7 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import { FormEvent, useEffect, useRef, useState } from "react";
+import {
+  FormEvent,
+  useEffect,
+  useRef,
+  useState,
+  useSyncExternalStore,
+} from "react";
 import { useRouter } from "next/navigation";
 import { SiteHeader } from "@/app/components/SiteHeader";
 import {
@@ -12,13 +18,19 @@ import { useCart } from "@/components/CartProvider";
 import { formatINR } from "@/lib/commerce-client";
 import styles from "./page.module.css";
 
-/** NTT DATA Atom UAT only on local hosts; live site uses WhatsApp shopping. */
-function isLocalNttHost(hostname: string) {
-  return (
-    hostname === "localhost" ||
-    hostname === "127.0.0.1" ||
-    hostname === "[::1]"
-  );
+/**
+ * Hosts that run the real NTT DATA Atom UAT checkout: local development only.
+ * Live hosts (e.g. www.cultscribe.com) keep the WhatsApp order flow.
+ */
+const ATOM_CHECKOUT_HOSTS = new Set(["localhost", "127.0.0.1", "[::1]"]);
+
+function isAtomCheckoutHost(hostname: string) {
+  return ATOM_CHECKOUT_HOSTS.has(hostname.toLowerCase());
+}
+
+/** The hostname never changes during a page session, so nothing to subscribe to. */
+function subscribeToHost() {
+  return () => {};
 }
 
 declare global {
@@ -306,13 +318,14 @@ export default function CheckoutPage() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [localReturnWarning, setLocalReturnWarning] = useState(false);
-  // Default WhatsApp (live). Flip to NTT DATA only after confirming localhost.
-  const [useNttData, setUseNttData] = useState(false);
+  // Default WhatsApp (live). NTT DATA only when the browser is on localhost;
+  // the server snapshot is false so hydration stays consistent.
+  const useNttData = useSyncExternalStore(
+    subscribeToHost,
+    () => isAtomCheckoutHost(window.location.hostname),
+    () => false,
+  );
   const attemptRef = useRef(0);
-
-  useEffect(() => {
-    setUseNttData(isLocalNttHost(window.location.hostname));
-  }, []);
 
   useEffect(() => {
     return () => {
@@ -328,7 +341,7 @@ export default function CheckoutPage() {
     clearAtomSdkUi();
     setBusy(true);
     const attempt = ++attemptRef.current;
-    const nttMode = isLocalNttHost(window.location.hostname);
+    const nttMode = isAtomCheckoutHost(window.location.hostname);
 
     try {
       const checkoutRes = await fetch("/api/checkout", {
@@ -483,11 +496,11 @@ export default function CheckoutPage() {
       <main className={styles.page}>
         <span className={styles.eyebrow}>Checkout</span>
         <h1 className={styles.title}>
-          {useNttData ? "NTT DATA test payment" : "Confirm your order"}
+          {useNttData ? "Secure payment" : "Confirm your order"}
         </h1>
         <p className={styles.lead}>
           {useNttData
-            ? "Enter your delivery details, then pay with the NTT DATA Atom UAT gateway. After a successful test payment you return here and see your products, total, and customer details on the order page."
+            ? "Enter your delivery details, then pay securely by card, UPI or net banking. After payment you return to your order confirmation."
             : "Enter your delivery details. The confirm button opens WhatsApp with your notebooks, quantities, and total so we can complete the order."}
         </p>
 
@@ -534,14 +547,12 @@ export default function CheckoutPage() {
             </div>
 
             {useNttData ? (
-              <p className={styles.payBadge}>NTT DATA · Atom AIPAY · UAT test</p>
+              <p className={styles.payBadge}>Secure payment · Card · UPI · Net banking</p>
             ) : null}
 
             {useNttData && localReturnWarning ? (
               <p className={styles.note} role="status">
-                Atom UAT needs a public HTTPS return URL. Set{" "}
-                <code>NTTDATA_RETURN_APP_URL=https://www.cultscribe.com</code>{" "}
-                (whitelisted with NDPS), then restart the server.
+                Online payment is temporarily unavailable. Please try again shortly.
               </p>
             ) : null}
 
@@ -632,29 +643,17 @@ export default function CheckoutPage() {
                 >
                   {busy
                     ? useNttData
-                      ? "Opening NTT DATA payment…"
+                      ? "Opening secure payment…"
                       : "Opening WhatsApp…"
                     : useNttData
-                      ? "Pay with NTT DATA (UAT test)"
+                      ? "Pay now"
                       : "Confirm order on WhatsApp"}
                 </button>
                 <Link className={`${styles.btn} ${styles.btnGhost}`} href="/cart">
                   Back to cart
                 </Link>
               </div>
-              {useNttData ? (
-                <div className={styles.testHint}>
-                  <strong>UAT test instruments (official Atom sandbox)</strong>
-                  <br />
-                  Card: 4012 8888 8888 1881 · Expiry: any future date · CVV: 123
-                  · Name: Test
-                  <br />
-                  UPI: atomots@upi
-                  <br />
-                  After payment, Atom returns you to the order page with your
-                  products and delivery details.
-                </div>
-              ) : (
+              {useNttData ? null : (
                 <p className={styles.note}>
                   Confirm opens WhatsApp with your order details so we can
                   arrange payment and delivery.
